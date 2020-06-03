@@ -55,5 +55,8 @@
     <ClInclude Include="..\..\Source\ArrayTexture\SpriteObject.h">
       <Filter>標頭檔</Filter>
     </ClInclude>
+    <ClInclude Include="AnimationConfig.h">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

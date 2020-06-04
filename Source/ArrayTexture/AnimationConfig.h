@@ -32,8 +32,12 @@ vector<AnimationConfig> AnimationConfigTable{
 	{ "L_Tank", "/Lionar/f1_tank.png" , 12, 6},
 };
 vector<AnimFrameSet> AnimFrameSetTable{
-	{ "L_Tank", "run", { {0, 7}, {0, 6}, {0, 5}, {0, 4}, {0, 3}, {0, 2}, {0, 1}, {0, 0}}, {}, 3, true },
-	{ "L_Tank", "hit", { {1, 8}, {1, 7}, {1, 8}, {1, 7}, {1, 8}}, {}, 3, true },
+	{ "L_Tank", "idle",		{	{2, 3}, {1, 5}, {1, 4}, {1, 3}, {1, 2}, {1, 1}, {1, 0}, {0, 11}, {0, 10}, {0, 9}, {0, 8},  }, {}, 6, true },
+	{ "L_Tank", "run",		{	{0, 7}, {0, 6}, {0, 5}, {0, 4}, {0, 3}, {0, 2}, {0, 1}, {0, 0}}, {}, 6, true },
+	{ "L_Tank", "hit",		{	{1, 8}, {1, 7}, {1, 8}, {1, 7}, {1, 8},  }, {}, 6, false, "idle" },
+	{ "L_Tank", "attack",	{	{2, 3}, {4, 6}, {4, 5}, {4, 4}, {4, 3}, {4, 2}, {4, 1}, {4, 0}, {3, 11}, {3, 10}, 
+								{3, 9}, {3, 8}, {3, 7}, {3, 6}, {3, 5}, {3, 4}, {3, 3}, {3, 2}, {2, 3},  }, {}, 12, false, "idle" },
+	{ "L_Tank", "die",		{	{2, 8}, {2, 7}, {2, 6}, {2, 5}, {2, 4}, {4, 7}, {2, 2}, {2, 1}, {2, 0}, {1, 11}, {1, 10}, {1, 9},  }, {}, 6, false },
 
 };
 
@@ -145,10 +149,15 @@ void Animation::StepFrame()
 void Animation::SetCurrentSet(string setName)
 {
 	AnimFrameSet* nextSet = NULL;
-	if ((nextSet = FindFrameSet(currentSet->nextSet)) != NULL)
+	if ((nextSet = FindFrameSet(setName)) != NULL)
 	{
 		currentSet = nextSet;
 		frame = 0;
+		cout << "AnimState set to: " << setName << ".\n";
+	}
+	else
+	{
+		cout << "## set AnimState failed. " << setName << " state NOT FOUND.\n";
 	}
 }
 int Animation::GetSheetFrame()

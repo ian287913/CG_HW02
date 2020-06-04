@@ -10,6 +10,8 @@
 using namespace glm;
 using namespace std;
 
+#define UPDATE_CYCLE 33		//	(mini second)
+
 //uniform id
 struct
 {
@@ -43,14 +45,10 @@ Sprite2D sprite2D;
 Sprite2D sprite2D2;
 
 //	ian
-//vector< Sprite2D*> CharacterSpriteSheets;
-//vector< CharacterSpriteStruct> CharacterSpriteStructs;
-
 vector<Animation*> animations;
 int CharacterIndex = 0;
-int CharacterSpriteFrame = 0;
-
-int rowGap = 0, colGap = 0;
+bool pauseAnimation = false;
+float updateSpeed = 1.0f;
 
 Sprite2D* MarioSpriteSheet;
 SpriteObject* MarioObject;
@@ -98,7 +96,6 @@ float RandomFloat(float lo, float hi)
 {
 	return linearRand(lo, hi);
 }
-
 glm::vec2 RandomPosition(float xRange, float yRange)
 {
 	float r = RandomFloat(1.0f, 1000.0f);
@@ -108,42 +105,6 @@ glm::vec2 RandomPosition(float xRange, float yRange)
 
 	return pos;
 }
-
-//void ReloadSprite()
-//{
-//	cout << "Reload sprite: " << CharacterSpriteStructs[CharacterIndex].fileName << "  (rowGap = " << rowGap << ", colGap = " << colGap << ")\n";
-//
-//	CharacterSpriteStructs[CharacterIndex].rowGap = rowGap;
-//	CharacterSpriteStructs[CharacterIndex].colGap = colGap;
-//	///CharacterSpriteStructs[CharacterSpriteStructs.size() - 1].spriteSheet->Init(ImagePath + CharacterSpriteStructs[CharacterIndex].fileName, 12, 6, 24, false, rowGap, colGap);
-//	CharacterSpriteStructs[CharacterIndex].spriteSheet->Init(ImagePath + CharacterSpriteStructs[CharacterIndex].fileName, CharacterSpriteStructs[CharacterIndex].rowCount, CharacterSpriteStructs[CharacterIndex].colCount, 24, false, rowGap, colGap);
-//
-//	CharacterSpriteFrame = 0;
-//}
-
-//void LoadCharacterSprite(string spriteName, int _rowCount, int _colCount, int _rowGap, int _colGap)
-//{
-//	cout << "LoadCharacterSprite: " << spriteName << "\n";
-//
-//	colGap = _colGap;
-//	rowGap = _rowGap;
-//
-//	cout << "Load sprite: " << spriteName << "  (rowGap = " << _rowGap << ", colGap = " << _colGap << ")\n";
-//
-//	CharacterSpriteStruct newCharacterStruct;
-//
-//	newCharacterStruct.fileName = spriteName;
-//	newCharacterStruct.colGap = _colGap;
-//	newCharacterStruct.rowGap = _rowGap;
-//	newCharacterStruct.rowCount = _rowCount;
-//	newCharacterStruct.colCount = _colCount;
-//	newCharacterStruct.spriteSheet = new Sprite2D();
-//	CharacterSpriteStructs.push_back(newCharacterStruct);
-//	CharacterSpriteStructs[CharacterSpriteStructs.size() - 1].spriteSheet->Init(ImagePath + spriteName, _rowCount, _colCount, 24, false, _rowGap, _colGap);
-//
-//	CharacterIndex = CharacterSpriteStructs.size() - 1;
-//	CharacterSpriteFrame = 0;
-//}
 
 void My_CreateObject()
 {
@@ -189,26 +150,6 @@ void My_LoadTextures()
 	{
 		animations.push_back(new Animation(config, ImagePath));
 	}
-	
-	//	characters
-	///LoadCharacterSprite("boss_christmas.png", 12, 6, 0, 0);
-	/*LoadCharacterSprite("/Lionar/f1_support.png", 12, 6, 0, 0);
-	LoadCharacterSprite("/Lionar/f1_tank.png", 12, 6, 0, 0);*/
-
-
-	//LoadCharacterSprite("neutral_voidhunter.png", 0, 0);
-	//LoadCharacterSprite("neutral_trinitywing.png", 0, 0);
-
-	/*for (int i = 0; i < AnimFrameSets.size(); i++)
-	{
-		cout << "Anim: " << AnimFrameSets[i].setName << " {";
-		for (int j = 0; j < AnimFrameSets[i].frames.size(); j++)
-		{
-			cout << " " << AnimFrameSets[i].frames[j].first << ",";
-		}
-		cout << " }\n";
-
-	}*/
 
 	//	only Mario
 	MarioSpriteSheet = new Sprite2D();
@@ -264,17 +205,62 @@ void My_Init()
 	m_camera.Zoom(64);
 }
 
+//	Draw a single animation (character)
+void DrawAnimation(Animation* anim)
+{
+	glm::vec2 pos[1];
+	int frame[1];
+	pos[0] = MarioObject->GetPosition();
+	frame[0] = anim->GetSheetFrame();
+	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(pos), pos);
+	glBufferSubData(GL_ARRAY_BUFFER, sizeof(pos), sizeof(GL_INT) * 1, frame);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+	//Update shaders' input variable
+	///////////////////////////	
+	glUseProgram(program);
+
+	glBindVertexArray(vao);
+
+	anim->Enable();
+	glUniformMatrix4fv(uniforms.mv_matrix, 1, GL_FALSE, value_ptr(m_camera.GetViewMatrix() * m_camera.GetModelMatrix() * scale(imageScale, imageScale, 1) * MarioSpriteSheet->GetModelMat()));
+	glUniformMatrix4fv(uniforms.proj_matrix, 1, GL_FALSE, value_ptr(m_camera.GetProjectionMatrix(aspect)));
+	glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, 1);
+	anim->Disable();
+
+	glBindVertexArray(0);
+	glUseProgram(0);
+}
+
 // GLUT callback. Called to draw the scene.
 void My_Display()
 {
 	glClearColor(0.5f, 0.5f, 0.5f, 0.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+	////////////////	Draw background		//////////////////////////////////////////////
 
+
+
+	////////////////	Draw characters		//////////////////////////////////////////////
+
+	DrawAnimation(animations[CharacterIndex]);
+
+	////////////////	Draw foreground		//////////////////////////////////////////////
+
+
+
+	////////////////	Draw UI				//////////////////////////////////////////////
+
+
+
+
+	/*	these are regular render example
 	glm::vec2 pos[1];
 	int frame[1];
 	pos[0] = MarioObject->GetPosition();
-	frame[0] = animations[CharacterIndex]->GetSheetFrame();//CharacterSpriteFrame;//MarioObject->GetCurrentFrame();
+	frame[0] = animations[CharacterIndex]->GetSheetFrame();
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
 	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(pos), pos);
 	glBufferSubData(GL_ARRAY_BUFFER, sizeof(pos), sizeof(GL_INT) * 1, frame);
@@ -287,36 +273,20 @@ void My_Display()
 	glBindVertexArray(vao);
 
 	animations[CharacterIndex]->Enable();
-	///CharacterSpriteStructs[CharacterIndex].spriteSheet->Enable();
 	///MarioSpriteSheet->Enable();
 	glUniformMatrix4fv(uniforms.mv_matrix, 1, GL_FALSE, value_ptr(m_camera.GetViewMatrix() * m_camera.GetModelMatrix() * scale(imageScale, imageScale, 1) * MarioSpriteSheet->GetModelMat()));
 	glUniformMatrix4fv(uniforms.proj_matrix, 1, GL_FALSE, value_ptr(m_camera.GetProjectionMatrix(aspect)));
 	glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, 1);
 	animations[CharacterIndex]->Disable();
-	///CharacterSpriteStructs[CharacterIndex].spriteSheet->Disable();
 	///MarioSpriteSheet->Disable();
-
-
-
-
-	/*for (int spriteID = 0; spriteID < spriteCount; ++spriteID)
-	{
-		spriteSheets[spriteID]->Enable();
-
-		glUniformMatrix4fv(uniforms.mv_matrix, 1, GL_FALSE, value_ptr(m_camera.GetViewMatrix() * m_camera.GetModelMatrix() * spriteSheets[spriteID]->GetModelMat()));
-		glUniformMatrix4fv(uniforms.proj_matrix, 1, GL_FALSE, value_ptr(m_camera.GetProjectionMatrix(aspect)));
-		glDrawArraysInstancedBaseInstance(GL_TRIANGLE_STRIP, 0, 4, 10, spriteID * 10);
-		spriteSheets[spriteID]->Disable();
-	}*/
 
 	glBindVertexArray(0);
 	glUseProgram(0);
-	///////////////////////////	
-	//	draw BG
-
+	*/
 
 	glutSwapBuffers();
 }
+
 
 //Call to resize the window
 void My_Reshape(int width, int height)
@@ -329,10 +299,13 @@ void My_Reshape(int width, int height)
 //Timer event (Update)
 void My_Timer(int val)
 {
-	animations[CharacterIndex]->Elapse(33.0f);
+	if (!pauseAnimation)
+	{
+		animations[CharacterIndex]->Elapse(((float)UPDATE_CYCLE) * updateSpeed);
+	}
 
 	glutPostRedisplay();
-	glutTimerFunc(33, My_Timer, val);
+	glutTimerFunc(UPDATE_CYCLE, My_Timer, val);
 }
 
 //Mouse event
@@ -373,62 +346,42 @@ void My_Keyboard(unsigned char key, int x, int y)
 		imageScale -= 2.0f;
 		break;
 	case 'a':
-		/*CharacterSpriteFrame -= 1;
-		if (CharacterSpriteFrame < 0) CharacterSpriteFrame = CharacterSpriteStructs[CharacterIndex].spriteSheet->GetCount() - 1;
-		cout << "Frame: " << CharacterSpriteFrame << " of " << CharacterSpriteStructs[CharacterIndex].spriteSheet->GetCount() << "\n";*/
+		updateSpeed -= 0.2f;
+		cout << "updateSpeed = " << updateSpeed << "\n";
 		break;
 	case 'd':
-		/*CharacterSpriteFrame = (CharacterSpriteFrame + 1) % CharacterSpriteStructs[CharacterIndex].spriteSheet->GetCount();
-		if (CharacterSpriteFrame < 0) CharacterSpriteFrame = CharacterSpriteStructs[CharacterIndex].spriteSheet->GetCount() - 1;
-		cout << "Frame: " << CharacterSpriteFrame << " of " << CharacterSpriteStructs[CharacterIndex].spriteSheet->GetCount() << "\n";*/
+		updateSpeed += 0.2f;
+		cout << "updateSpeed = " << updateSpeed << "\n";
 		break;
 	case 'z':
-		CharacterSpriteFrame = 0;
+		pauseAnimation = !pauseAnimation;
+		cout << "pauseAnimation = " << pauseAnimation << "\n";
 		break;
 	case 'q':
 		CharacterIndex -= 1;
 		if (CharacterIndex < 0) CharacterIndex = animations.size() - 1;
-
-		/*if (CharacterIndex < 0) CharacterIndex = CharacterSpriteStructs.size() - 1;
-		colGap = CharacterSpriteStructs[CharacterIndex].colGap;
-		rowGap = CharacterSpriteStructs[CharacterIndex].rowGap;
-		CharacterSpriteFrame = 0;*/
 		break;
 	case 'e':
 		CharacterIndex = (CharacterIndex + 1) % animations.size();
-
-		/*CharacterIndex = (CharacterIndex + 1) % CharacterSpriteStructs.size();
-		colGap = CharacterSpriteStructs[CharacterIndex].colGap;
-		rowGap = CharacterSpriteStructs[CharacterIndex].rowGap;
-		CharacterSpriteFrame = 0;*/
 		break;
-	case 'l':
-		///ReloadSprite();
+	case '1':
+		animations[CharacterIndex]->SetCurrentSet("idle");
 		break;
-	//case '1':
-	//	colGap += 1;
-	//	cout << "colGap: " << colGap << "\n";
-	//	ReloadSprite();
-	//	break;
-	//case '2':
-	//	colGap -= 1;
-	//	cout << "colGap: " << colGap << "\n";
-	//	ReloadSprite();
-	//	break;
-	//case '3':
-	//	rowGap += 1;
-	//	cout << "rowGap: " << rowGap << "\n";
-	//	ReloadSprite();
-	//	break;
-	//case '4':
-	//	rowGap -= 1;
-	//	cout << "rowGap: " << rowGap << "\n";
-	//	ReloadSprite();
-	//	break;
+	case '2':
+		animations[CharacterIndex]->SetCurrentSet("run");
+		break;
+	case '3':
+		animations[CharacterIndex]->SetCurrentSet("attack");
+		break;
+	case '4':
+		animations[CharacterIndex]->SetCurrentSet("hit");
+		break;
+	case '5':
+		animations[CharacterIndex]->SetCurrentSet("die");
+		break;
 	default:
 		break;
 	}
-
 }
 
 void My_Mouse_Moving(int x, int y) {

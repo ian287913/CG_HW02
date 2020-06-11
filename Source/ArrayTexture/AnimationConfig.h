@@ -24,6 +24,9 @@ struct AnimationConfig
 	string imgPath;
 	int rowCount;
 	int colCount;
+	float shadowOffsetX;
+	float shadowOffsetY;
+	float shadowScale;
 	vector<AnimFrameSet> frameSets;
 };
 
@@ -39,14 +42,15 @@ Super	(high damage & health, kb-resist)
 
 vector<AnimationConfig> AnimationConfigTable{
 	//{ "L_Basic", "/Lionar/f1_tank.png" , 12, 6},
-	{ "L_Tank", "/Lionar/f1_tank.png" , 12, 6},
-	{ "L_Ranger", "/Lionar/f1_backlinearcher.png" , 8, 16},
-	{ "L_Tower", "/Lionar/f1_ironcliffemonument.png" , 10, 10},
+	{ "L_Tank"	, "/Lionar/f1_tank.png"					, 12, 6		, 0.04f, -0.3f, 0.56f},
+	{ "L_Ranger", "/Lionar/f1_backlinearcher.png"		, 8, 16		, 0.04f, -0.3f, 0.56f},
+	{ "L_Tower"	, "/Lionar/f1_ironcliffemonument.png"	, 10, 10	, 0.04f, -0.3f, 0.56f},
 };
 vector<AnimFrameSet> AnimFrameSetTable{
 	{ "L_Tank", "idle",		{	{2, 3}, {1, 5}, {1, 4}, {1, 3}, {1, 2}, {1, 1}, {1, 0}, {0, 11}, {0, 10}, {0, 9}, {0, 8},  }, {}, 6, true },
 	{ "L_Tank", "run",		{	{0, 7}, {0, 6}, {0, 5}, {0, 4}, {0, 3}, {0, 2}, {0, 1}, {0, 0}}, {}, 6, true },
-	{ "L_Tank", "hit",		{	{1, 8}, {1, 7}, {1, 8}, {1, 7}, {1, 8},  }, {}, 6, false, "idle" },
+	{ "L_Tank", "hit",		{	{1, 8}, {1, 7}, {1, 8},  }, {}, 1, false, "idle" },
+	//{ "L_Tank", "hit",		{	{1, 8}, {1, 7}, {1, 8}, {1, 7}, {1, 8},  }, {}, 6, false, "idle" },
 	{ "L_Tank", "attack",	{	{2, 3}, {4, 6}, {4, 5}, {4, 4}, {4, 3}, {4, 2}, {4, 1}, {4, 0}, {3, 11}, {3, 10}, 
 								{3, 9}, {3, 8}, {3, 7}, {3, 6}, {3, 5}, {3, 4}, {3, 3}, {3, 2}, {2, 3},  }, {}, 12, false, "idle" },
 	{ "L_Tank", "die",		{	{2, 8}, {2, 7}, {2, 6}, {2, 5}, {2, 4}, {4, 7}, {2, 2}, {2, 1}, {2, 0}, {1, 11}, {1, 10}, {1, 9},  }, {}, 6, false },
@@ -71,6 +75,9 @@ struct SpriteAndFramesets
 	string name;
 	Sprite2D* spriteSheet;
 	vector<AnimFrameSet> frameSets;
+	float shadowOffsetX;
+	float shadowOffsetY;
+	float shadowScale;
 };
 
 class Animation
@@ -83,6 +90,9 @@ public:
 
 	AnimFrameSet *currentSet;			//	current set
 	int frame;							//	current frame
+	float shadowOffsetX;
+	float shadowOffsetY;
+	float shadowScale;
 	float extraTime = 0;
 
 public:
@@ -129,6 +139,10 @@ void Animation::InitializeAllSpritesAndSets(string imagePath)
 				newAnimationData->frameSets.push_back(set);
 			}
 		}
+		
+		newAnimationData->shadowOffsetX = config.shadowOffsetX;
+		newAnimationData->shadowOffsetY = config.shadowOffsetY;
+		newAnimationData->shadowScale = config.shadowScale;
 
 		SpriteAndFramesetsList.push_back(newAnimationData);
 	}
@@ -160,7 +174,10 @@ Animation::Animation(string characterName)
 	//	reference sprite
 	spriteSheet = foundSpriteAndFramesets->spriteSheet;
 	frameSets = &(foundSpriteAndFramesets->frameSets);
-
+	//	set shadow offsets
+	shadowOffsetX = foundSpriteAndFramesets->shadowOffsetX;
+	shadowOffsetY = foundSpriteAndFramesets->shadowOffsetY;
+	shadowScale = foundSpriteAndFramesets->shadowScale;
 	
 	if (frameSets->size() > 0)
 		currentSet = &((*frameSets)[0]);

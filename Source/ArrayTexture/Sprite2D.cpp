@@ -70,8 +70,6 @@ bool Sprite2D::Init(std::string fileName, int rowCount, int colCount, int FPS, b
 			}
 		}
 		
-		
-
 		glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
 		glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
 

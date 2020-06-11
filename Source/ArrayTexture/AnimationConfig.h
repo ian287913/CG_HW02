@@ -32,7 +32,7 @@ struct AnimationConfig
 Minion
 Tank
 Ranged
-Lancer (spd, kb)
+Lancer	(spd, kb)
 Super	(high damage & health, kb-resist)
 
 */
@@ -66,18 +66,30 @@ vector<AnimFrameSet> AnimFrameSetTable{
 
 };
 
+struct SpriteAndFramesets
+{
+	string name;
+	Sprite2D* spriteSheet;
+	vector<AnimFrameSet> frameSets;
+};
+
 class Animation
 {
-	Sprite2D* spriteSheet = NULL;
-	AnimFrameSet *currentSet = NULL;	//	current set
-	vector<AnimFrameSet> frameSets;
-	int frame;	//	current frame
+public:
+	static vector<SpriteAndFramesets*> SpriteAndFramesetsList;
+
+	Sprite2D *spriteSheet = NULL;		//	referenced sprite (texture)
+	vector<AnimFrameSet> *frameSets;	//	referenced FrameSets;
+
+	AnimFrameSet *currentSet;			//	current set
+	int frame;							//	current frame
 	float extraTime = 0;
-	///float currentTime, spritePlayTime = 0;
 
 public:
+	static void InitializeAllSpritesAndSets(string imagePath);
+
 	Animation();
-	Animation(AnimationConfig config, string imagePath);
+	Animation(string characterName);
 
 	void Elapse(float deltaTime);
 	AnimFrameSet* FindFrameSet(string setName);
@@ -88,36 +100,70 @@ public:
 	bool Enable();
 	bool Disable();
 };
+vector<SpriteAndFramesets*> Animation::SpriteAndFramesetsList;
+void Animation::InitializeAllSpritesAndSets(string imagePath)
+{
+	for each (AnimationConfig config in AnimationConfigTable)
+	{
+		SpriteAndFramesets* newAnimationData = new SpriteAndFramesets();
+		newAnimationData->name = config.name;
+
+		//	create sprite
+		cout << "LoadCharacterSpritesheet: " << config.imgPath << "\n";
+		newAnimationData->spriteSheet = new Sprite2D();
+		newAnimationData->spriteSheet->Init(imagePath + config.imgPath, config.rowCount, config.colCount, 3, false, 0, 0);
+
+		//	get all sets
+		for each (AnimFrameSet set in AnimFrameSetTable)
+		{
+			if (set.ownerName == config.name)
+			{
+				//	digest rawFrames to frames
+				set.frames.clear();
+				for each (pair<int, int> framePair in set.rawFrames)
+				{
+					set.frames.push_back(framePair.first * config.rowCount + framePair.second);
+				}
+
+				//	add this set
+				newAnimationData->frameSets.push_back(set);
+			}
+		}
+
+		SpriteAndFramesetsList.push_back(newAnimationData);
+	}
+	
+}
+
 Animation::Animation()
 {
 
 }
-Animation::Animation(AnimationConfig config, string imagePath)
+Animation::Animation(string characterName)
 {
-	//	create sprite
-	cout << "LoadCharacterSpritesheet: " << config.imgPath << "\n";
-	spriteSheet = new Sprite2D();
-	spriteSheet->Init(imagePath + config.imgPath, config.rowCount, config.colCount, 3, false, 0, 0);
-
-	//	get all sets
-	for each (AnimFrameSet set in AnimFrameSetTable)
+	SpriteAndFramesets *foundSpriteAndFramesets = NULL;
+	//	get SpriteAndFramesets
+	for each (SpriteAndFramesets *spriteAndFramesets in SpriteAndFramesetsList)
 	{
-		if (set.ownerName == config.name)
+		if (spriteAndFramesets->name == characterName)
 		{
-			//	digest rawFrames to frames
-			set.frames.clear();
-			for each (pair<int, int> framePair in set.rawFrames)
-			{
-				set.frames.push_back(framePair.first * config.rowCount + framePair.second);
-			}
-
-			//	add this set
-			frameSets.push_back(set);
+			foundSpriteAndFramesets = spriteAndFramesets;
+			break;
 		}
 	}
+	if (foundSpriteAndFramesets == NULL)
+	{
+		cout << "###\tCannot find config of characterName: " << characterName << ".\N";
+		return;
+	}
 
-	if (frameSets.size() > 0)
-		currentSet = &(frameSets[0]);
+	//	reference sprite
+	spriteSheet = foundSpriteAndFramesets->spriteSheet;
+	frameSets = &(foundSpriteAndFramesets->frameSets);
+
+	
+	if (frameSets->size() > 0)
+		currentSet = &((*frameSets)[0]);
 }
 
 void Animation::Elapse(float deltaTime)
@@ -132,11 +178,11 @@ void Animation::Elapse(float deltaTime)
 }
 AnimFrameSet* Animation::FindFrameSet(string setName)
 {
-	for (int i = 0; i < frameSets.size(); i++)
+	for (int i = 0; i < (*frameSets).size(); i++)
 	{
-		if (frameSets[i].setName == setName)
+		if ((*frameSets)[i].setName == setName)
 		{
-			return &(frameSets[i]);
+			return &((*frameSets)[i]);
 		}
 	}
 	return NULL;
@@ -161,10 +207,7 @@ void Animation::StepFrame()
 			frame = 0;
 		}
 		//	no loop and no next set. just stay at current frame...
-		else
-		{
-
-		}
+		else {}
 	}
 	else
 	{

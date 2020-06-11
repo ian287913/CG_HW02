@@ -144,11 +144,14 @@ void My_CreateObject()
 
 void My_LoadTextures()
 {
+	//	Load all animations
+	Animation::InitializeAllSpritesAndSets(ImagePath);
+
 	//	Create all animations
 	animations.clear();
 	for each (AnimationConfig config in AnimationConfigTable)
 	{
-		animations.push_back(new Animation(config, ImagePath));
+		animations.push_back(new Animation(config.name));
 	}
 
 	//	only Mario
@@ -224,7 +227,8 @@ void DrawAnimation(Animation* anim)
 	glBindVertexArray(vao);
 
 	anim->Enable();
-	glUniformMatrix4fv(uniforms.mv_matrix, 1, GL_FALSE, value_ptr(m_camera.GetViewMatrix() * m_camera.GetModelMatrix() * scale(imageScale, imageScale, 1) * MarioSpriteSheet->GetModelMat()));
+	glUniformMatrix4fv(uniforms.mv_matrix, 1, GL_FALSE, value_ptr(m_camera.GetViewMatrix() * m_camera.GetModelMatrix() * scale(imageScale, imageScale, 1) * anim->spriteSheet->GetModelMat()));
+	///glUniformMatrix4fv(uniforms.mv_matrix, 1, GL_FALSE, value_ptr(m_camera.GetViewMatrix() * m_camera.GetModelMatrix() * scale(imageScale, imageScale, 1) * MarioSpriteSheet->GetModelMat()));
 	glUniformMatrix4fv(uniforms.proj_matrix, 1, GL_FALSE, value_ptr(m_camera.GetProjectionMatrix(aspect)));
 	glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, 1);
 	anim->Disable();
@@ -406,7 +410,7 @@ int main(int argc, char *argv[])
 #endif
 
 	glutInitWindowPosition(100, 100);
-	glutInitWindowSize(1080, 720);
+	glutInitWindowSize(1800, 720);
 	glutCreateWindow(ProjectName.c_str()); // You cannot use OpenGL functions before this line; The OpenGL context must be created first by glutCreateWindow()!
 #ifdef _MSC_VER
 	glewInit();

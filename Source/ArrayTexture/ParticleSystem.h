@@ -3,5 +3,11 @@
 #include <vector>
 #include "../../Include/Common.h"
 
-GLuint vao;
-GLuint vbo;
+
+class ParticleSystem
+{
+	GLuint			program;			//shader program
+
+	GLuint vao;
+	GLuint vbo;
+};

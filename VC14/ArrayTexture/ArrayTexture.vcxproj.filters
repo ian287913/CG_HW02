@@ -58,5 +58,8 @@
     <ClInclude Include="..\..\Source\ArrayTexture\AnimationConfig.h">
       <Filter>標頭檔</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Source\ArrayTexture\ParticleSystem.h">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

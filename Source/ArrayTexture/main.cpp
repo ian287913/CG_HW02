@@ -19,19 +19,9 @@ struct
 	GLint  proj_matrix;
 } uniforms;
 
-struct CharacterSpriteStruct
-{
-	string fileName;
-	Sprite2D* spriteSheet;
-	int rowCount, colCount;
-	int rowGap, colGap;
-};
-
-const std::string ProjectName = "ArrayTexture";
-const std::string ShaderPath = "./Shader/" + ProjectName + "/";
-const std::string ImagePath = "./Imgs/" + ProjectName + "/";
-const int spriteCount = 3;
-const int objectCount = 30;
+const std::string ProjectName = "Project2_2DGame";
+const std::string ShaderPath = "./Shader/ArrayTexture/";
+const std::string ImagePath = "./Imgs/ArrayTexture/";
 
 GLuint			program;			//shader program
 mat4			proj_matrix;		//projection matrix
@@ -41,23 +31,20 @@ float			aspect;
 GLuint			textureID;
 ViewManager		m_camera;
 
-Sprite2D sprite2D;
-Sprite2D sprite2D2;
-
 //	ian
 vector<Animation*> animations;
 int CharacterIndex = 0;
 bool pauseAnimation = false;
 float updateSpeed = 1.0f;
 
-Sprite2D* MarioSpriteSheet;
-SpriteObject* MarioObject;
-int MarioFrame = 0;
-float imageScale = 4.0f;
+Sprite2D* ShadowSprite;
+Sprite2D* BackgroundSprite;
+
+float imageScale = 1.0f;
+float debug_x = 0.0f;
+float debug_y = 0.0f;
 //
 
-Sprite2D* spriteSheets[spriteCount];
-SpriteObject* objects[objectCount];
 
 GLuint vao;
 GLuint vbo;
@@ -106,23 +93,16 @@ glm::vec2 RandomPosition(float xRange, float yRange)
 	return pos;
 }
 
-void My_CreateObject()
+void SetVaoVbo()
 {
-	//	Mario only
-	MarioObject = new SpriteObject();
-	MarioObject->SetOffsetPerFrame(vec2(RandomFloat(0.3f, 0.5f), 0.f));
-	MarioObject->SetPosition(glm::vec2(0, 0));
-	MarioObject->AddSprite(MarioSpriteSheet);
-	MarioObject->SetStartFrame(0);
-
 	glGenVertexArrays(1, &vao);
 	glBindVertexArray(vao);
 
 	//	pos and frame attributes (layout)
 	glm::vec2 pos[1];
-	pos[0] = MarioObject->GetPosition();
+	pos[0] = vec2(0,0);
 	int frame[1];
-	frame[0] = MarioObject->GetCurrentFrame();
+	frame[0] = 0;
 
 	glGenBuffers(1, &vbo);
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
@@ -154,10 +134,13 @@ void My_LoadTextures()
 		animations.push_back(new Animation(config.name));
 	}
 
-	//	only Mario
-	MarioSpriteSheet = new Sprite2D();
-	//MarioSpriteSheet->Init(ImagePath + "Mario.png", 6, 1, 24);
-	MarioSpriteSheet->Init(ImagePath + "neutral_voidhunter.png", 10, 10, 24, false, -1, -1);
+	//	shadow
+	ShadowSprite = new Sprite2D();
+	ShadowSprite->Init(ImagePath + "shadow.png", 1, 1, 24, false, 0, 0);
+
+	//	Background
+	BackgroundSprite = new Sprite2D();
+	BackgroundSprite->Init(ImagePath + "Background/BG.png", 1, 1, 24, false, 0, 0);
 
 	return;
 }
@@ -203,17 +186,17 @@ void My_Init()
 
 	//Load model to shader program
 	My_LoadTextures();
-	My_CreateObject();
+	SetVaoVbo();
 	m_camera.ToggleOrtho();
 	m_camera.Zoom(64);
 }
 
 //	Draw a single animation (character)
-void DrawAnimation(Animation* anim)
+void DrawAnimation(Animation* anim, glm::mat4 _matrix)
 {
 	glm::vec2 pos[1];
 	int frame[1];
-	pos[0] = MarioObject->GetPosition();
+	pos[0] = vec2(0,0);
 	frame[0] = anim->GetSheetFrame();
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
 	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(pos), pos);
@@ -227,11 +210,38 @@ void DrawAnimation(Animation* anim)
 	glBindVertexArray(vao);
 
 	anim->Enable();
-	glUniformMatrix4fv(uniforms.mv_matrix, 1, GL_FALSE, value_ptr(m_camera.GetViewMatrix() * m_camera.GetModelMatrix() * scale(imageScale, imageScale, 1) * anim->spriteSheet->GetModelMat()));
-	///glUniformMatrix4fv(uniforms.mv_matrix, 1, GL_FALSE, value_ptr(m_camera.GetViewMatrix() * m_camera.GetModelMatrix() * scale(imageScale, imageScale, 1) * MarioSpriteSheet->GetModelMat()));
+	glUniformMatrix4fv(uniforms.mv_matrix, 1, GL_FALSE, value_ptr(m_camera.GetViewMatrix() * m_camera.GetModelMatrix() * _matrix * anim->spriteSheet->GetModelMat()));
 	glUniformMatrix4fv(uniforms.proj_matrix, 1, GL_FALSE, value_ptr(m_camera.GetProjectionMatrix(aspect)));
 	glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, 1);
 	anim->Disable();
+
+	glBindVertexArray(0);
+	glUseProgram(0);
+}
+
+//	draw only one-frame sprite
+void DrawSprite(Sprite2D* _sprite, glm::mat4 _parentMatrix, const vec3& _position, const vec3& _scale)
+{
+	glm::vec2 pos[1];
+	int frame[1];
+	pos[0] = glm::vec2(0, 0);
+	frame[0] = 0;
+	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(pos), pos);
+	glBufferSubData(GL_ARRAY_BUFFER, sizeof(pos), sizeof(GL_INT) * 1, frame);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+	//Update shaders' input variable
+	///////////////////////////	
+	glUseProgram(program);
+
+	glBindVertexArray(vao);
+
+	_sprite->Enable();
+	glUniformMatrix4fv(uniforms.mv_matrix, 1, GL_FALSE, value_ptr(m_camera.GetViewMatrix() * m_camera.GetModelMatrix() * _parentMatrix * translate(_position) * scale(_scale) * _sprite->GetModelMat()));
+	glUniformMatrix4fv(uniforms.proj_matrix, 1, GL_FALSE, value_ptr(m_camera.GetProjectionMatrix(aspect)));
+	glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, 1);
+	_sprite->Disable();
 
 	glBindVertexArray(0);
 	glUseProgram(0);
@@ -244,12 +254,17 @@ void My_Display()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	////////////////	Draw background		//////////////////////////////////////////////
+	
+	DrawSprite(BackgroundSprite, translate(0, 0, 0), vec3(0, 0, 0), vec3(9, 9, 1));
 
 
+	////////////////	Draw shadows		//////////////////////////////////////////////
+	mat4 parentMatrix = translate(0, -2, 0) * scale(2, 2, 1);
+	DrawSprite(ShadowSprite, parentMatrix, vec3(animations[CharacterIndex]->shadowOffsetX, animations[CharacterIndex]->shadowOffsetY, 0), vec3(animations[CharacterIndex]->shadowScale, animations[CharacterIndex]->shadowScale, 1));
 
 	////////////////	Draw characters		//////////////////////////////////////////////
 
-	DrawAnimation(animations[CharacterIndex]);
+	DrawAnimation(animations[CharacterIndex], parentMatrix);
 
 	////////////////	Draw foreground		//////////////////////////////////////////////
 
@@ -258,35 +273,6 @@ void My_Display()
 	////////////////	Draw UI				//////////////////////////////////////////////
 
 
-
-
-	/*	these are regular render example
-	glm::vec2 pos[1];
-	int frame[1];
-	pos[0] = MarioObject->GetPosition();
-	frame[0] = animations[CharacterIndex]->GetSheetFrame();
-	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(pos), pos);
-	glBufferSubData(GL_ARRAY_BUFFER, sizeof(pos), sizeof(GL_INT) * 1, frame);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-	//Update shaders' input variable
-	///////////////////////////	
-	glUseProgram(program);
-
-	glBindVertexArray(vao);
-
-	animations[CharacterIndex]->Enable();
-	///MarioSpriteSheet->Enable();
-	glUniformMatrix4fv(uniforms.mv_matrix, 1, GL_FALSE, value_ptr(m_camera.GetViewMatrix() * m_camera.GetModelMatrix() * scale(imageScale, imageScale, 1) * MarioSpriteSheet->GetModelMat()));
-	glUniformMatrix4fv(uniforms.proj_matrix, 1, GL_FALSE, value_ptr(m_camera.GetProjectionMatrix(aspect)));
-	glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, 1);
-	animations[CharacterIndex]->Disable();
-	///MarioSpriteSheet->Disable();
-
-	glBindVertexArray(0);
-	glUseProgram(0);
-	*/
 
 	glutSwapBuffers();
 }
@@ -344,19 +330,29 @@ void My_Keyboard(unsigned char key, int x, int y)
 	switch (key)
 	{
 	case 'w':
-		imageScale += 2.0f;
+		debug_y += 0.2f;
+		cout << "debug_y = " << debug_y << "\n";
 		break;
 	case 's':
-		imageScale -= 2.0f;
+		debug_y -= 0.2f;
+		cout << "debug_y = " << debug_y << "\n";
+		break;
+	case 'd':
+		debug_x += 0.2f;
+		cout << "debug_x = " << debug_x << "\n";
 		break;
 	case 'a':
+		debug_x -= 0.2f;
+		cout << "debug_x = " << debug_x << "\n";
+		break;
+	/*case 'a':
 		updateSpeed -= 0.2f;
 		cout << "updateSpeed = " << updateSpeed << "\n";
 		break;
 	case 'd':
 		updateSpeed += 0.2f;
 		cout << "updateSpeed = " << updateSpeed << "\n";
-		break;
+		break;*/
 	case 'z':
 		pauseAnimation = !pauseAnimation;
 		cout << "pauseAnimation = " << pauseAnimation << "\n";

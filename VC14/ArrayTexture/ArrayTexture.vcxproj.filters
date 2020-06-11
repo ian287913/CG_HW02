@@ -39,13 +39,13 @@
     <ClCompile Include="..\..\Source\ArrayTexture\SpriteObject.cpp">
       <Filter>原始程式檔</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\ArrayTexture\GameObject.cpp">
-      <Filter>原始程式檔</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\Source\ArrayTexture\BattleObject.cpp">
       <Filter>原始程式檔</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\ArrayTexture\Battler.cpp">
+      <Filter>原始程式檔</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\ArrayTexture\GameObject.cpp">
       <Filter>原始程式檔</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\ArrayTexture\Tower.cpp">
@@ -70,13 +70,16 @@
     <ClInclude Include="..\..\Source\ArrayTexture\AnimationConfig.h">
       <Filter>標頭檔</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Source\ArrayTexture\ParticleSystem.h">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\Source\ArrayTexture\BattleObject.h">
       <Filter>標頭檔</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\ArrayTexture\GameObject.h">
+    <ClInclude Include="..\..\Source\ArrayTexture\Battler.h">
       <Filter>標頭檔</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\ArrayTexture\Battler.h">
+    <ClInclude Include="..\..\Source\ArrayTexture\GameObject.h">
       <Filter>標頭檔</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\ArrayTexture\Tower.h">

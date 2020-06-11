@@ -5,7 +5,8 @@
 #include "Sprite2D.h"
 #include "SpriteObject.h"
 #include <vector>
-#include "AnimationConfig.h"
+#include "Tower.h"
+#include "Battler.h"
 
 using namespace glm;
 using namespace std;

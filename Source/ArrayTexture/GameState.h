@@ -65,7 +65,7 @@ const int GameState::rateMoney_level[LVLNUM] = {50, 100, 150, 200, 250};
 const float GameState::leftSpawnPos = -7;
 const float GameState::rightSpawnPos = 7;
 const float GameState::spawnDistance = -5;
-const float GameState::spawnDistanceRange = 0.1f;
+const float GameState::spawnDistanceRange = 0.6f;
 const float GameState::towerHP = 100;
 const float GameState::towerAttack = 10000;
 

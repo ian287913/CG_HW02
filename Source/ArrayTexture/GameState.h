@@ -13,7 +13,8 @@ struct CharacterConfig
 const vector<CharacterConfig> characterTable
 {
 	// name, speed, delay, kb, hp, att, attCD, range, sprite, x, y, z, size, enemy, diedelay
-	{"L_Tank", {10, 0.8f, 50, {250, 20, 1.0f, 1.0f, "L_Tank", 0, 0, 0, 2, true, 3}}}
+	{"L_Tank", {10, 0.8f, 50, {250, 20, 1.0f, 1.5f, "L_Tank", 0, 0, 0, 2.5, true, 3}}},
+	{"L_Ranger", {10, 2.0f, 50, {250, 30, 1.0f, 4.0f, "L_Ranger", 0, 0, 0, 3.0f, true, 3}}}
 };
 
 static class GameState
@@ -63,9 +64,9 @@ const int GameState::lvUP_cost[LVLNUM] = {250, 750, 1200, 1750, 3000};
 const int GameState::rateMoney_level[LVLNUM] = {50, 100, 150, 200, 250};
 const float GameState::leftSpawnPos = -7;
 const float GameState::rightSpawnPos = 7;
-const float GameState::spawnDistance = -3;
+const float GameState::spawnDistance = -5;
 const float GameState::spawnDistanceRange = 0.1f;
-const float GameState::towerHP = 1000;
+const float GameState::towerHP = 100;
 const float GameState::towerAttack = 10000;
 
 // .cpp
@@ -97,7 +98,6 @@ Battler* GameState::AddBattler(string name, bool isEnemy)
 		{
 			cout << "Game: Add Battler of " << name << endl;
 			BattlerConfig config = characterTable[i].config;
-			cout << "add battler's attack: " << config.bof.attack << endl;
 			config.bof.pos = isEnemy ? leftSpawnPos : rightSpawnPos;
 			config.bof.dist = spawnDistance + (spawnDistanceRange * 2) * rand() / (RAND_MAX + 1.0) - spawnDistanceRange;
 			config.bof.facingRight = isEnemy;
@@ -167,16 +167,9 @@ GameState::GameState()
 	{
 		// HP, attack, attackCD, attackrange {string character; pos; height; dist; sizescale; facingRight; dieTime; }
 		BOConfig config = { towerHP, towerAttack, laserCD, 10, "L_Tower", rightSpawnPos, 0, spawnDistance, 5, false, 100 };
-		leftTower = new Tower(config, true);
+		leftTower = new Tower(config, false);
 	}
 
-	// test: 製作貓咪
-	{
-		// 敵方
-		this->AddBattler("L_Tank", true);
-		// 友芳
-		this->AddBattler("L_Tank", false);
-	}
 }
 
 GameState::~GameState()

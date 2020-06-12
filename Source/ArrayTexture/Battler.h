@@ -41,7 +41,6 @@ protected:
 
 Battler::Battler(BattlerConfig config): BattleObject(config.bof)
 {
-	cout << "Battler " << this->id << ": constructing..." << endl;
 	this->speed = config.speed;
 	this->attackDelay = config.attackDelay;
 	this->state = BattlerState::idle;
@@ -54,7 +53,6 @@ Battler::Battler(BattlerConfig config): BattleObject(config.bof)
 Battler::~Battler()
 {
 	// no need
-	cout << "Battler " << this->id << ": destructing..." << endl;
 }
 void Battler::Update(float deltaTime)
 {
@@ -66,7 +64,7 @@ float Battler::Damage(float amount)
 {
 	cout << "Battler " << this->id << ": get damage: " << amount << endl;
 	this->hp -= amount;
-	if (amount <= 0 && !isDying)
+	if (this->hp <= 0 && !isDying)
 	{
 		this->hp = 0;
 	}
@@ -217,7 +215,7 @@ BattleObject* Battler::FindTarget()
 	for (int i = allObjects.size() - 1; i >= 0; i--)
 	{
 		// 特別不檢查每個人的hp是否為0, 因為tower hp為0 還是照打
-		if (allObjects[i]->GameObject::id == this->id || this->facing * allObjects[i]->GameObject::facing >= 0)
+		if (this->facing * allObjects[i]->GameObject::facing >= 0)
 			continue;
 		float dist = abs(allObjects[i]->GameObject::position - this->position);
 		// cout << "finding... dist: " << dist << endl;

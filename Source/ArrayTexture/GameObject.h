@@ -24,6 +24,7 @@ public:
 	void StartDestroy();
 protected:
 	bool isDying;
+	void rearangeID();
 };
 
 ///////////////////////		.cpp
@@ -66,6 +67,7 @@ GameObject::~GameObject()
 {
 	cout << "GameObject " << this->id << ": destructing..." << endl;
 	actors.erase(actors.begin() + this->id);
+	this->rearangeID();
 	delete this->sprite;
 	this->sprite = NULL;
 }
@@ -74,4 +76,12 @@ void GameObject::StartDestroy()
 {
 	cout << "GameObject " << this->id << ": Start destroy" << endl;
 	isDying = true;
+}
+
+void GameObject::rearangeID()
+{
+	for (int i = actors.size() - 1; i >= 0; i--)
+	{
+		actors[i]->id = i;
+	}
 }

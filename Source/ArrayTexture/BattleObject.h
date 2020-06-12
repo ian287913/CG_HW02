@@ -45,7 +45,7 @@ float BattleObject::Damage(float amount)
 {
 	cout << "BattleObject " << this->id << ": get damage: " << amount << endl;
 	this->hp -= amount;
-	if (amount <= 0 && !isDying)
+	if (this->hp <= 0 && !isDying)
 	{
 		this->hp = 0;
 		Die();
@@ -92,5 +92,9 @@ void BattleObject::Die()
 	cout << "BattleObject " << this->id << ": die." << endl;
 	sprite->SetCurrentSet("die");
 	allObjects.erase(allObjects.begin() + this->id_bo);
+	for (int i = allObjects.size() - 1; i >= 0; i--)
+	{
+		allObjects[i]->id_bo = i;
+	}
 	StartDestroy();
 }

@@ -9,7 +9,7 @@ public:
 	Tower(BOConfig config, bool enemy);
 	~Tower();
 	// 呼叫勝利或失敗畫面
-	void Die();
+	void Die() override;
 };
 
 //////////////////	.cpp

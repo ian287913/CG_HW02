@@ -22,6 +22,10 @@ class ParticleSystem
 public:
 	static void InitShaderSystem(std::string shaderPath);
 	static void InitSpriteTable(std::string spritePath);
+	static void UpdateInstances(float deltaTime);
+	static void RenderInstances(ViewManager m_camera, float aspect);
+	static void CreateInstance(std::string spriteName, float _lifeTime, int _amount, float _spawnRadius_Max, float _spawnRadius_Min,
+		float _speed, float _fadeRadius, float _fadeDistance);
 
 	ParticleSystem();
 	ParticleSystem(std::string spriteName);
@@ -29,31 +33,40 @@ public:
 
 	void Render(ViewManager m_camera, float aspect);
 	void Elapse(float deltaTime);
-	void SetAttributes(int _amount, float _spawnRadius_Max, float _spawnRadius_Min, float _speed, float _fadeRadius);
+	void SetAttributes(	float _lifeTime, int _amount, float _spawnRadius_Max, float _spawnRadius_Min, 
+						float _speed, float _fadeRadius, float _fadeDistance);
 	void SetPosition(const vec3 &_position);
 	void SetScale(const vec3 &_scale);
 	vec3 mPosition = vec3(0, 0, 0);
 	vec3 mScale = vec3(1, 1, 1);
 
 private:
+	static std::vector<ParticleSystem> particleInstances;
 	static std::vector<ParticleSprite> ParticleSpriteTable;
 	static GLuint program;
 	static GLuint vao;
 	static GLuint vbo;
 	static GLint  mv_matrix;
 	static GLint  proj_matrix;
+	static GLint  uniform_time;
+	static GLint  uniform_speed;
+	static GLint  uniform_fadeRadius;
+	static GLint  uniform_fadeDistance;
 
-	float time = 0;
+	float particleTime = 0;
 	glm::vec2 pos[100];
 	int frame[100];
 	//	system attributes
 	Sprite2D* sprite;
+	float lifeTime = 5000;
 	int amount = 1;				//	MAX = 100
 	float spawnRadius_Max = 0;
 	float spawnRadius_Min = 0;
 	float speed = 0;
-	float fadeRadius = 2.0f;	//	start to fade out after this radius
+	float fadeRadius = 3.0f;	//	start to fade out after this radius
+	float fadeDistance = 2.0f;	//	the distance that alpha: 1 -> 0
 };
+std::vector<ParticleSystem> ParticleSystem::particleInstances;
 std::vector<ParticleSystem::ParticleSprite> ParticleSystem::ParticleSpriteTable
 {
 	{	"Hit",		"particle_hit.png",		NULL},
@@ -64,9 +77,16 @@ GLuint ParticleSystem::vao;
 GLuint ParticleSystem::vbo;
 GLint  ParticleSystem::mv_matrix;
 GLint  ParticleSystem::proj_matrix;
+GLint  ParticleSystem::uniform_time;
+GLint  ParticleSystem::uniform_speed;
+GLint  ParticleSystem::uniform_fadeRadius;
+GLint  ParticleSystem::uniform_fadeDistance;
 
 void ParticleSystem::InitShaderSystem(std::string shaderPath)
 {
+	//////////	Init Instance vector
+	particleInstances.clear();
+
 	//////////	Init program
 	program = glCreateProgram();
 
@@ -91,7 +111,12 @@ void ParticleSystem::InitShaderSystem(std::string shaderPath)
 	//Cache uniform variable id
 	proj_matrix = glGetUniformLocation(program, "um4p");
 	mv_matrix = glGetUniformLocation(program, "um4mv");
+	uniform_time = glGetUniformLocation(program, "time");
+	uniform_speed = glGetUniformLocation(program, "speed");
+	uniform_fadeRadius = glGetUniformLocation(program, "fadeRadius");
+	uniform_fadeDistance = glGetUniformLocation(program, "fadeDistance");
 
+	
 	glUseProgram(program);
 
 	//////////	Init buffers
@@ -129,6 +154,36 @@ void ParticleSystem::InitSpriteTable(std::string spritePath)
 	}
 	cout << "SpriteTable initiated.\n";
 }
+void ParticleSystem::RenderInstances(ViewManager m_camera, float aspect)
+{
+	for each (ParticleSystem particle in particleInstances)
+	{
+		particle.Render(m_camera, aspect);
+	}
+}
+void ParticleSystem::UpdateInstances(float deltaTime)
+{
+	//	update and handle outdated instance
+	for (int i = particleInstances.size()-1; i >= 0; i--)
+	{
+		particleInstances[i].Elapse(deltaTime);
+		if (particleInstances[i].lifeTime < 0)
+		{
+			particleInstances.erase(particleInstances.begin() + i);
+		}
+	}
+}
+void ParticleSystem::CreateInstance(std::string spriteName, 
+									float _lifeTime, int _amount, float _spawnRadius_Max, float _spawnRadius_Min,
+									float _speed, float _fadeRadius, float _fadeDistance)
+{
+	ParticleSystem newParticle(spriteName);
+	newParticle.SetAttributes(_lifeTime, _amount, _spawnRadius_Max, _spawnRadius_Min, _speed, _fadeRadius, _fadeDistance);
+
+	particleInstances.push_back(newParticle);
+}
+
+
 
 ParticleSystem::ParticleSystem() {}
 ParticleSystem::ParticleSystem(std::string spriteName)
@@ -151,13 +206,15 @@ ParticleSystem::ParticleSystem(std::string spriteName)
 }
 ParticleSystem::~ParticleSystem() {}
 
-void ParticleSystem::SetAttributes(int _amount, float _spawnRadius_Max, float _spawnRadius_Min, float _speed, float _fadeRadius)
+void ParticleSystem::SetAttributes(float _lifeTime, int _amount, float _spawnRadius_Max, float _spawnRadius_Min, float _speed, float _fadeRadius, float _fadeDistance)
 {
+	lifeTime = _lifeTime;
 	amount = _amount <= 100 ? _amount : 100;
 	spawnRadius_Max = _spawnRadius_Max;
 	spawnRadius_Min = _spawnRadius_Min;
 	speed = _speed;
 	fadeRadius = _fadeRadius;
+	fadeDistance = _fadeDistance;
 
 	//	init offsets
 	for (int i = 0; i < amount; i++)
@@ -171,8 +228,8 @@ void ParticleSystem::SetAttributes(int _amount, float _spawnRadius_Max, float _s
 
 void ParticleSystem::Elapse(float deltaTime)
 {
-
-	///...
+	particleTime += deltaTime;
+	lifeTime -= deltaTime;
 }
 void ParticleSystem::SetPosition(const vec3 &_position)
 {
@@ -212,6 +269,10 @@ void ParticleSystem::Render(ViewManager m_camera, float aspect)
 	sprite->Enable();
 	glUniformMatrix4fv(mv_matrix, 1, GL_FALSE, value_ptr(m_camera.GetViewMatrix() * m_camera.GetModelMatrix() * scale(mScale) * translate(mPosition)));
 	glUniformMatrix4fv(proj_matrix, 1, GL_FALSE, value_ptr(m_camera.GetProjectionMatrix(aspect)));
+	glUniform1f(uniform_time, particleTime * 0.001f);
+	glUniform1f(uniform_speed, speed);
+	glUniform1f(uniform_fadeRadius, fadeRadius);
+	glUniform1f(uniform_fadeDistance, fadeDistance);
 	glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, amount);
 	sprite->Disable();
 

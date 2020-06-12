@@ -1,4 +1,4 @@
-Particle scaling	direction
+Particle scaling	direction	move spawn
 
 character sprite offset
 

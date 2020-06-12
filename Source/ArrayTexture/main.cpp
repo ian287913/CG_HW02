@@ -403,6 +403,18 @@ void My_Keyboard(unsigned char key, int x, int y)
 	case '5':
 		animations[CharacterIndex]->SetCurrentSet("die");
 		break;
+	case '6':
+		myGameState->AddBattler("L_Tank", true);
+		break;
+	case '7':
+		myGameState->AddBattler("L_Tank", false);
+		break;
+	case '8':
+		myGameState->AddBattler("L_Ranger", true);
+		break;
+	case '9':
+		myGameState->AddBattler("L_Ranger", false);
+		break;
 	default:
 		break;
 	}

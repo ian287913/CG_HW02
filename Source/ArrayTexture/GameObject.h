@@ -60,12 +60,12 @@ GameObject::GameObject(string character, float pos, float high, float dist, floa
 	this->isDying = false;
 	this->id = actors.size();
 
-	cout << "GameObject " << this->id << ": constructing..." << endl;
+	// cout << "GameObject " << this->id << ": constructing..." << endl;
 	actors.push_back(this);
 }
 GameObject::~GameObject()
 {
-	cout << "GameObject " << this->id << ": destructing..." << endl;
+	// cout << "GameObject " << this->id << ": destructing..." << endl;
 	actors.erase(actors.begin() + this->id);
 	this->rearangeID();
 	delete this->sprite;
@@ -74,7 +74,7 @@ GameObject::~GameObject()
 
 void GameObject::StartDestroy()
 {
-	cout << "GameObject " << this->id << ": Start destroy" << endl;
+	// cout << "GameObject " << this->id << ": Start destroy" << endl;
 	isDying = true;
 }
 

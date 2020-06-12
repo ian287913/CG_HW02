@@ -62,7 +62,7 @@ void Battler::Update(float deltaTime)
 }
 float Battler::Damage(float amount)
 {
-	cout << "Battler " << this->id << ": get damage: " << amount << endl;
+	// cout << "Battler " << this->id << ": get damage: " << amount << endl;
 	this->hp -= amount;
 	if (this->hp <= 0 && !isDying)
 	{
@@ -94,13 +94,13 @@ void Battler::AI(float deltaTime)
 			BattleObject* target = FindTarget();
 			if (target == NULL)
 			{
-				cout << "Battler " << this->id << ": state run" << endl;
+				// cout << "Battler " << this->id << ": state run" << endl;
 				this->state = BattlerState::run;
 				this->sprite->SetCurrentSet("run");
 			}
 			else
 			{
-				cout << "Battler " << this->id << ": state pre-attack" << endl;
+				//cout << "Battler " << this->id << ": state pre-attack" << endl;
 				this->state = BattlerState::preAttack;
 				this->attackTimer = attackDelay;
 				this->sprite->SetCurrentSet("attack");
@@ -112,7 +112,7 @@ void Battler::AI(float deltaTime)
 		BattleObject* target = FindTarget();
 		if (target != NULL)
 		{
-			cout << "Battler " << this->id << ": state preAttack" << endl;
+			// cout << "Battler " << this->id << ": state preAttack" << endl;
 			this->state = BattlerState::preAttack;
 			this->attackTimer = attackDelay;
 			this->sprite->SetCurrentSet("attack");
@@ -124,7 +124,7 @@ void Battler::AI(float deltaTime)
 		BattleObject* target = FindTarget();
 		if (target == NULL)
 		{
-			cout << "Battler " << this->id << ": state idle" << endl;
+			// cout << "Battler " << this->id << ": state idle" << endl;
 			this->state = BattlerState::idle;
 			this->sprite->SetCurrentSet("idle");
 		}
@@ -133,7 +133,7 @@ void Battler::AI(float deltaTime)
 			if (this->attackTimer <= 0)
 			{
 				this->Attack(target);
-				cout << "Battler " << this->id << ": state idle" << endl;
+				// cout << "Battler " << this->id << ": state idle" << endl;
 				this->state = BattlerState::idle;
 				this->CDTimer = this->attackCD;
 			}
@@ -146,14 +146,14 @@ void Battler::AI(float deltaTime)
 		{
 			if (this->hp > 0)
 			{
-				cout << "Battler " << this->id << ": state run" << endl;
+				// cout << "Battler " << this->id << ": state run" << endl;
 				this->state = BattlerState::run;
 				this->sprite->SetCurrentSet("run");
 				KBingRange = 0;
 			}
 			else
 			{
-				cout << "Battler " << this->id << ": state die" << endl;
+				// cout << "Battler " << this->id << ": state die" << endl;
 				this->state = BattlerState::die;
 				this->Die();
 			}

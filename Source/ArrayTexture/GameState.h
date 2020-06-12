@@ -73,6 +73,7 @@ protected:
 	bool constructed = false;
 	// update呼叫的敵方AI
 	void EnemyAI(float deltaTime);
+	void KillAll(bool toEnemy);
 };
 
 // 參數定義
@@ -179,12 +180,14 @@ void GameState::Update(float deltaTime)
 		{
 			// 勝利
 			cout << "----------------Player Wins!!----------------" << endl;
+			KillAll(true);
 			GameOver = true;
 		}
 		else if(rightTower->hp <= 0)
 		{
 			// 勝利
 			cout << "----------------AI Wins!!----------------" << endl;
+			KillAll(false);
 			GameOver = true;
 		}
 	}
@@ -215,6 +218,19 @@ void GameState::EnemyAI(float deltaTime)
 	}
 	
 	
+}
+
+void GameState::KillAll(bool toEnemy)
+{
+	for (int i = BattleObject::allObjects.size() - 1; i >= 0; i--)
+	{
+		if (toEnemy && BattleObject::allObjects[i]->facing > 0)
+		{
+			BattleObject::allObjects[i]->Damage(BattleObject::allObjects[i]->hp);
+		}
+		else if (!toEnemy && BattleObject::allObjects[i]->facing < 0)
+			BattleObject::allObjects[i]->Damage(BattleObject::allObjects[i]->hp);
+	}
 }
 
 GameState::GameState()

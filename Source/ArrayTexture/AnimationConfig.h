@@ -2,6 +2,7 @@
 #include <string>
 #include <vector>
 #include "../../Include/Common.h"
+#include "TranslateRoteteScaleHelper.h"
 
 using namespace std;
 
@@ -24,6 +25,8 @@ struct AnimationConfig
 	string imgPath;
 	int rowCount;
 	int colCount;
+	float anchorOffsetX;
+	float anchorOffsetY;
 	float shadowOffsetX;
 	float shadowOffsetY;
 	float shadowScale;
@@ -42,9 +45,9 @@ Super	(high damage & health, kb-resist)
 
 vector<AnimationConfig> AnimationConfigTable{
 	//{ "L_Basic", "/Lionar/f1_tank.png" , 12, 6},
-	{ "L_Tank"	, "/Lionar/f1_tank.png"					, 12, 6		, 0.02f, -0.3f, 0.56f},
-	{ "L_Ranger", "/Lionar/f1_backlinearcher.png"		, 8, 16		, 0.04f, -0.3f, 0.56f},
-	{ "L_Tower"	, "/Lionar/f1_ironcliffemonument.png"	, 10, 10	, 0.0f, -0.33f, 0.56f},
+	{ "L_Tank"	, "/Lionar/f1_tank.png"					, 12, 6		, 0.0f, 0.25f	, 0.02f, -0.3f, 0.56f},
+	{ "L_Ranger", "/Lionar/f1_backlinearcher.png"		, 8, 16		, 0.0f, 0.35f	, 0.04f, -0.3f, 0.56f},
+	{ "L_Tower"	, "/Lionar/f1_ironcliffemonument.png"	, 10, 10	, 0.0f, 0.3f	, 0.0f, -0.33f, 0.56f},
 };
 vector<AnimFrameSet> AnimFrameSetTable{
 	{ "L_Tank", "idle",		{	{2, 3}, {1, 5}, {1, 4}, {1, 3}, {1, 2}, {1, 1}, {1, 0}, {0, 11}, {0, 10}, {0, 9}, {0, 8},  }, {}, 6, true },
@@ -75,6 +78,8 @@ struct SpriteAndFramesets
 	string name;
 	Sprite2D* spriteSheet;
 	vector<AnimFrameSet> frameSets;
+	float anchorOffsetX;
+	float anchorOffsetY;
 	float shadowOffsetX;
 	float shadowOffsetY;
 	float shadowScale;
@@ -90,6 +95,7 @@ public:
 
 	AnimFrameSet *currentSet;			//	current set
 	int frame;							//	current frame
+	mat4 anchorTranslate;
 	float shadowOffsetX;
 	float shadowOffsetY;
 	float shadowScale;
@@ -139,7 +145,10 @@ void Animation::InitializeAllSpritesAndSets(string imagePath)
 				newAnimationData->frameSets.push_back(set);
 			}
 		}
-		
+
+		newAnimationData->anchorOffsetX = config.anchorOffsetX;
+		newAnimationData->anchorOffsetY = config.anchorOffsetY;
+
 		newAnimationData->shadowOffsetX = config.shadowOffsetX;
 		newAnimationData->shadowOffsetY = config.shadowOffsetY;
 		newAnimationData->shadowScale = config.shadowScale;
@@ -174,6 +183,8 @@ Animation::Animation(string characterName)
 	//	reference sprite
 	spriteSheet = foundSpriteAndFramesets->spriteSheet;
 	frameSets = &(foundSpriteAndFramesets->frameSets);
+	//	set anchor offset
+	anchorTranslate = translate(foundSpriteAndFramesets->anchorOffsetX, foundSpriteAndFramesets->anchorOffsetY, 0);
 	//	set shadow offsets
 	shadowOffsetX = foundSpriteAndFramesets->shadowOffsetX;
 	shadowOffsetY = foundSpriteAndFramesets->shadowOffsetY;

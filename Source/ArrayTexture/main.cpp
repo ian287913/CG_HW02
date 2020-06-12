@@ -41,6 +41,7 @@ float updateSpeed = 1.0f;
 
 Sprite2D* ShadowSprite;
 Sprite2D* BackgroundSprite;
+Sprite2D* DebugSprite;
 
 float imageScale = 1.0f;
 float debug_x = 0.0f;
@@ -105,6 +106,10 @@ void My_LoadTextures()
 	//	Background
 	BackgroundSprite = new Sprite2D();
 	BackgroundSprite->Init(ImagePath + "Background/BG.png", 1, 1, 24, false, 0, 0);
+
+	//	Debug axis
+	DebugSprite = new Sprite2D();
+	DebugSprite->Init(ImagePath + "axis.png", 1, 1, 24, false, 0, 0);
 
 	return;
 }
@@ -193,6 +198,8 @@ void DrawAnimation(Animation* anim, glm::mat4 _matrix)
 
 	anim->Enable();
 	glUniformMatrix4fv(uniforms.mv_matrix, 1, GL_FALSE, value_ptr(m_camera.GetViewMatrix() * m_camera.GetModelMatrix() * _matrix * anim->spriteSheet->GetModelMat()));
+	///	anchor½Õ¾ã¥Î:
+	///glUniformMatrix4fv(uniforms.mv_matrix, 1, GL_FALSE, value_ptr(m_camera.GetViewMatrix() * m_camera.GetModelMatrix() * _matrix * translate(0, debug_x, 0) * anim->spriteSheet->GetModelMat()));
 	glUniformMatrix4fv(uniforms.proj_matrix, 1, GL_FALSE, value_ptr(m_camera.GetProjectionMatrix(aspect)));
 	glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, 1);
 	anim->Disable();
@@ -241,7 +248,8 @@ void My_Display()
 
 
 	////////////////	Draw shadows		//////////////////////////////////////////////
-	mat4 parentMatrix = translate(0, -2, 0) * scale(2, 2, 1);
+	//mat4 parentMatrix = translate(0, 0, 0) * scale(1, 1, 1);
+	mat4 parentMatrix = animations[CharacterIndex]->anchorTranslate;
 	DrawSprite(ShadowSprite, parentMatrix, vec3(animations[CharacterIndex]->shadowOffsetX, animations[CharacterIndex]->shadowOffsetY, 0), vec3(animations[CharacterIndex]->shadowScale, animations[CharacterIndex]->shadowScale, 1));
 	for (int i = GameObject::actors.size() - 1; i >= 0; i--)
 	{
@@ -251,7 +259,7 @@ void My_Display()
 			* scale(go->scale * go->facing, go->scale, 1);
 		DrawSprite(
 			ShadowSprite, 
-			trans, 
+			trans * go->sprite->anchorTranslate,
 			vec3(go->sprite->shadowOffsetX, 
 				go->sprite->shadowOffsetY, 0),
 			vec3(go->sprite->shadowScale,
@@ -279,7 +287,7 @@ void My_Display()
 		// draw
 		mat4 trans = translate(go->position, go->height + go->distance * GameObject::depthRatio, 0) 
 			* scale(go->scale * go->facing, go->scale, 1);
-		DrawAnimation(go->sprite, trans);
+		DrawAnimation(go->sprite, trans * go->sprite->anchorTranslate);
 	}
 
 	////////////////	Draw foreground		//////////////////////////////////////////////
@@ -288,6 +296,8 @@ void My_Display()
 
 	////////////////	Draw UI				//////////////////////////////////////////////
 
+	//	Debug axis
+	DrawSprite(DebugSprite, translate(0, 0, 0), vec3(0, 0, 0), vec3(debug_y, debug_y, 1));
 
 
 	glutSwapBuffers();
@@ -353,7 +363,7 @@ void My_Keyboard(unsigned char key, int x, int y)
 	switch (key)
 	{
 	case 'w':
-		ParticleSystem::CreateInstance("Fire", 8000, 5, 0.05f, 0, 16.0f, 0.5, 0.3f);
+		///ParticleSystem::CreateInstance("Fire", 8000, 5, 0.05f, 0, 16.0f, 0.5, 0.3f);
 		debug_y += 0.2f;
 		cout << "debug_y = " << debug_y << "\n";
 		break;
@@ -362,11 +372,11 @@ void My_Keyboard(unsigned char key, int x, int y)
 		cout << "debug_y = " << debug_y << "\n";
 		break;
 	case 'd':
-		debug_x += 0.2f;
+		debug_x += 0.05f;
 		cout << "debug_x = " << debug_x << "\n";
 		break;
 	case 'a':
-		debug_x -= 0.2f;
+		debug_x -= 0.05f;
 		cout << "debug_x = " << debug_x << "\n";
 		break;
 	/*case 'a':

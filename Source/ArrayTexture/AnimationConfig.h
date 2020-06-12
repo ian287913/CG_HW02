@@ -44,7 +44,7 @@ vector<AnimationConfig> AnimationConfigTable{
 	//{ "L_Basic", "/Lionar/f1_tank.png" , 12, 6},
 	{ "L_Tank"	, "/Lionar/f1_tank.png"					, 12, 6		, 0.02f, -0.3f, 0.56f},
 	{ "L_Ranger", "/Lionar/f1_backlinearcher.png"		, 8, 16		, 0.04f, -0.3f, 0.56f},
-	{ "L_Tower"	, "/Lionar/f1_ironcliffemonument.png"	, 10, 10	, 0.04f, -0.3f, 0.56f},
+	{ "L_Tower"	, "/Lionar/f1_ironcliffemonument.png"	, 10, 10	, 0.0f, -0.33f, 0.56f},
 };
 vector<AnimFrameSet> AnimFrameSetTable{
 	{ "L_Tank", "idle",		{	{2, 3}, {1, 5}, {1, 4}, {1, 3}, {1, 2}, {1, 1}, {1, 0}, {0, 11}, {0, 10}, {0, 9}, {0, 8},  }, {}, 6, true },

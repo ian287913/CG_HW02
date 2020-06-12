@@ -5,8 +5,7 @@
 #include "Sprite2D.h"
 #include "SpriteObject.h"
 #include <vector>
-#include "Tower.h"
-#include "Battler.h"
+#include "GameState.h"
 #include "ParticleSystem.h"
 #include "TranslateRoteteScaleHelper.h"
 
@@ -47,6 +46,11 @@ float imageScale = 1.0f;
 float debug_x = 0.0f;
 float debug_y = 0.0f;
 //
+
+//  will
+GameState* myGameState;
+//
+
 
 GLuint vao;
 GLuint vbo;
@@ -164,6 +168,9 @@ void My_Init()
 
 	m_camera.ToggleOrtho();
 	m_camera.Zoom(64);
+
+	// will
+	myGameState = new GameState();
 }
 
 //	Draw a single animation (character)
@@ -236,10 +243,44 @@ void My_Display()
 	////////////////	Draw shadows		//////////////////////////////////////////////
 	mat4 parentMatrix = translate(0, -2, 0) * scale(2, 2, 1);
 	DrawSprite(ShadowSprite, parentMatrix, vec3(animations[CharacterIndex]->shadowOffsetX, animations[CharacterIndex]->shadowOffsetY, 0), vec3(animations[CharacterIndex]->shadowScale, animations[CharacterIndex]->shadowScale, 1));
+	for (int i = GameObject::actors.size() - 1; i >= 0; i--)
+	{
+		GameObject* go = GameObject::actors[i];
+		// draw
+		mat4 trans = translate(go->position, go->distance * GameObject::depthRatio, 0)
+			* scale(go->scale * go->facing, go->scale, 1);
+		DrawSprite(
+			ShadowSprite, 
+			trans, 
+			vec3(go->sprite->shadowOffsetX, 
+				go->sprite->shadowOffsetY, 0),
+			vec3(go->sprite->shadowScale,
+				go->sprite->shadowScale, 1));
+	}
 
 	////////////////	Draw characters		//////////////////////////////////////////////
 
 	DrawAnimation(animations[CharacterIndex], parentMatrix);
+	vector<GameObject*> sortedGO = GameObject::actors;
+	for (int i = sortedGO.size() - 1; i >= 0; i--)
+	{
+		GameObject* go = sortedGO[i];
+		for (int j = i - 1; j >= 0; j--)
+		{
+			GameObject* goCompare = sortedGO[j];
+			if (goCompare->distance > go->distance)
+			{
+				// switch
+				sortedGO[i] = goCompare;
+				sortedGO[j] = go;
+				go = goCompare;
+			}
+		}
+		// draw
+		mat4 trans = translate(go->position, go->height + go->distance * GameObject::depthRatio, 0) 
+			* scale(go->scale * go->facing, go->scale, 1);
+		DrawAnimation(go->sprite, trans);
+	}
 
 	////////////////	Draw foreground		//////////////////////////////////////////////
 
@@ -269,6 +310,11 @@ void My_Timer(int val)
 		animations[CharacterIndex]->Elapse(((float)UPDATE_CYCLE) * updateSpeed);
 		//	ParticleSystem
 		ParticleSystem::UpdateInstances(((float)UPDATE_CYCLE) * updateSpeed);
+	}
+
+	if (myGameState != NULL)
+	{
+		myGameState->Update(((float)UPDATE_CYCLE) * updateSpeed);
 	}
 
 	glutPostRedisplay();
@@ -409,6 +455,7 @@ int main(int argc, char *argv[])
 	////////////////////
 
 	// Enter main event loop.
+
 	glutMainLoop();
 
 	cout << "after loop\n";

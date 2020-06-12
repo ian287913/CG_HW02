@@ -43,6 +43,7 @@ vector<BattleObject*> BattleObject::allObjects = vector<BattleObject*>();
 
 float BattleObject::Damage(float amount)
 {
+	cout << "BattleObject " << this->id << ": get damage: " << amount << endl;
 	this->hp -= amount;
 	if (amount <= 0 && !isDying)
 	{
@@ -54,6 +55,7 @@ float BattleObject::Damage(float amount)
 
 void BattleObject::Attack(BattleObject* victim)
 {
+	cout << "BattleObject " << this->id << ": attack BattleObject " << victim->id << endl;
 	victim->Damage(this->attack);
 	this->CDTimer = attackCD;
 }
@@ -63,25 +65,31 @@ void BattleObject::Update(float deltaTime)
 	this->GameObject::Update(deltaTime);
 	if (CDTimer > 0 && !stopTime)
 	{
-		CDTimer -= deltaTime * timeScale;
+		CDTimer -= deltaTime * timeScale * 0.001f;
 	}
 }
 
 BattleObject::BattleObject(BOConfig config) : GameObject(config.character, config.pos, config.height, config.dist, config.sizescale, config.facingRight, config.dieTime)
 {
+	cout << "BattleObject " << this->id << ": constructing..." << endl;
 	this->hp = config.hp;
 	this->attack = config.attack;
 	this->attackCD = config.attackCD;
 	this->attackRange = config.attackRange;
 	this->CDTimer = 0;
+	this->id_bo = allObjects.size();
+
+	allObjects.push_back(this);
 }
 BattleObject::~BattleObject()
 {
 	// no need
+	cout << "BattleObject " << this->id << ": destructing..." << endl;
 }
 void BattleObject::Die()
 {
 	// ¤Á´«°Êµe
+	cout << "BattleObject " << this->id << ": die." << endl;
 	sprite->SetCurrentSet("die");
 	allObjects.erase(allObjects.begin() + this->id_bo);
 	StartDestroy();

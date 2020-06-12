@@ -427,6 +427,7 @@ void My_Keyboard(unsigned char key, int x, int y)
 		break;
 	case '0':
 		myGameState->enableEnemyAI = !myGameState->enableEnemyAI;
+		cout << "Game: AI " << ((myGameState->enableEnemyAI) ? "Enabled" : "Disabled") << endl;
 		break;
 	default:
 		break;

@@ -78,8 +78,8 @@ protected:
 // 參數定義
 const float GameState::spawnCD[CHARNUM] = {2, 2, 2, 2.5f, 5.0f};
 const float GameState::laserCD = 10;
-const float GameState::AICD = 8;
-const float GameState::AICD_range = 1.5f;
+const float GameState::AICD = 10;
+const float GameState::AICD_range = 2.5f;
 const int GameState::cost[CHARNUM] = {75, 150, 300, 600, 1000};
 const int GameState::maxMoney_level[LVLNUM] = {500, 1000, 1500, 2000, 2500};
 const int GameState::lvUP_cost[LVLNUM] = {250, 750, 1200, 1750, 3000};

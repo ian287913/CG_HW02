@@ -250,7 +250,6 @@ void Animation::SetCurrentSet(string setName)
 	{
 		currentSet = nextSet;
 		frame = 0;
-		cout << "AnimState set to: " << setName << ".\n";
 	}
 	else
 	{

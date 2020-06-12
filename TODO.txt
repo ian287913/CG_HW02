@@ -1,4 +1,4 @@
-Particle scaling
+Particle scaling	direction
 
 character sprite offset
 

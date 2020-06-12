@@ -1,6 +1,8 @@
 #pragma once
 #include "AnimationConfig.h"
 
+const float totalFadeOutTime = 1.0f;
+
 // 每個遊戲內的單位一定有包含圖組類型與現在的動畫state
 class GameObject
 {
@@ -17,6 +19,7 @@ public:
 	float scale;						// 圖像的縮放
 	float facing;						// 圖像的x軸縮放, 0代表面向左邊 1代表面向右邊
 	float dyingTimer;					// 當 isDying 的時候會開始倒數, 為0時則destroy.
+	float fading = 0.0f;				// shader fading 
 
 	GameObject(string character, float pos, float high, float dist, float sizescale, bool facingRight, float dieTime);
 	virtual ~GameObject();
@@ -24,6 +27,7 @@ public:
 	void StartDestroy();
 protected:
 	bool isDying;
+	float fadeOutTimer;
 	void rearangeID();
 };
 
@@ -38,12 +42,18 @@ void GameObject::Update(float deltaTime)
 {
 	this->sprite->Elapse(deltaTime);
 	// 每幀call的function
-	if (isDying)
+	if (this->isDying)
 	{
-		dyingTimer -= deltaTime * 0.001f;
-		if (dyingTimer < 0)
+		if (this->dyingTimer < 0)
 		{
-			delete this;
+			this->fadeOutTimer -= deltaTime * 0.001f;
+			this->fading = 0.7f - this->fadeOutTimer / totalFadeOutTime;
+			if(this->fadeOutTimer < -0.6f)
+				delete this;
+		}
+		else
+		{
+			this->dyingTimer -= deltaTime * 0.001f;
 		}
 	}
 }
@@ -59,6 +69,8 @@ GameObject::GameObject(string character, float pos, float high, float dist, floa
 	this->dyingTimer = dieTime;
 	this->isDying = false;
 	this->id = actors.size();
+	this->fading = 0.0f;
+	this->fadeOutTimer = totalFadeOutTime;
 
 	// cout << "GameObject " << this->id << ": constructing..." << endl;
 	actors.push_back(this);

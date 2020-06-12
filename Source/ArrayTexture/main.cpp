@@ -182,7 +182,7 @@ void My_Init()
 }
 
 //	Draw a single animation (character)
-void DrawAnimation(Animation* anim, glm::mat4 _matrix)
+void DrawAnimation(Animation* anim, glm::mat4 _matrix, float fading = 0.0f)
 {
 	glm::vec2 pos[1];
 	int frame[1];
@@ -204,7 +204,7 @@ void DrawAnimation(Animation* anim, glm::mat4 _matrix)
 	///	anchor½Õ¾ã¥Î:
 	///glUniformMatrix4fv(uniforms.mv_matrix, 1, GL_FALSE, value_ptr(m_camera.GetViewMatrix() * m_camera.GetModelMatrix() * _matrix * translate(0, debug_x, 0) * anim->spriteSheet->GetModelMat()));
 	glUniformMatrix4fv(uniforms.proj_matrix, 1, GL_FALSE, value_ptr(m_camera.GetProjectionMatrix(aspect)));
-	glUniform1f(uniforms.fading, debug_x);
+	glUniform1f(uniforms.fading, fading);
 
 	glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, 1);
 	anim->Disable();
@@ -214,7 +214,7 @@ void DrawAnimation(Animation* anim, glm::mat4 _matrix)
 }
 
 //	draw only one-frame sprite
-void DrawSprite(Sprite2D* _sprite, glm::mat4 _parentMatrix, const vec3& _position, const vec3& _scale)
+void DrawSprite(Sprite2D* _sprite, glm::mat4 _parentMatrix, const vec3& _position, const vec3& _scale, float fading = 0.0f)
 {
 	glm::vec2 pos[1];
 	int frame[1];
@@ -234,7 +234,7 @@ void DrawSprite(Sprite2D* _sprite, glm::mat4 _parentMatrix, const vec3& _positio
 	_sprite->Enable();
 	glUniformMatrix4fv(uniforms.mv_matrix, 1, GL_FALSE, value_ptr(m_camera.GetViewMatrix() * m_camera.GetModelMatrix() * _parentMatrix * translate(_position) * scale(_scale) * _sprite->GetModelMat()));
 	glUniformMatrix4fv(uniforms.proj_matrix, 1, GL_FALSE, value_ptr(m_camera.GetProjectionMatrix(aspect)));
-	glUniform1f(uniforms.fading, 0.0f);
+	glUniform1f(uniforms.fading, fading);
 	glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, 1);
 	_sprite->Disable();
 
@@ -264,12 +264,14 @@ void My_Display()
 		mat4 trans = translate(go->position, go->distance * GameObject::depthRatio, 0)
 			* scale(go->scale * go->facing, go->scale, 1);
 		DrawSprite(
-			ShadowSprite, 
+			ShadowSprite,
 			trans * go->sprite->anchorTranslate,
-			vec3(go->sprite->shadowOffsetX, 
+			vec3(go->sprite->shadowOffsetX,
 				go->sprite->shadowOffsetY, 0),
 			vec3(go->sprite->shadowScale,
-				go->sprite->shadowScale, 1));
+				go->sprite->shadowScale, 1),
+			go->fading
+		);
 	}
 
 	////////////////	Draw characters		//////////////////////////////////////////////
@@ -293,7 +295,7 @@ void My_Display()
 		// draw
 		mat4 trans = translate(go->position, go->height + go->distance * GameObject::depthRatio, 0) 
 			* scale(go->scale * go->facing, go->scale, 1);
-		DrawAnimation(go->sprite, trans * go->sprite->anchorTranslate);
+		DrawAnimation(go->sprite, trans * go->sprite->anchorTranslate, go->fading);
 	}
 
 	////////////////	Draw foreground		//////////////////////////////////////////////
@@ -423,10 +425,10 @@ void My_Keyboard(unsigned char key, int x, int y)
 		myGameState->AddBattler(0, true);
 		break;
 	case '7':
-		myGameState->AddBattler("L_Tank", false);
+		myGameState->AddBattler(1, true);
 		break;
 	case '8':
-		myGameState->AddBattler(1, true);
+		myGameState->AddBattler("L_Tank", false);
 		break;
 	case '9':
 		myGameState->AddBattler("L_Ranger", false);

@@ -15,17 +15,17 @@ struct CharacterConfig
 const vector<CharacterConfig> characterTable
 {
 	// name, speed, delay, kb, hp, att, attCD, range, sprite, x, y, z, size, enemy, diedelay
-	{"L_Tank", {10, 0.8f, 50, {250, 20, 1.0f, 1.5f, "L_Tank", 0, 0, 0, 2.5, true, 3}}},
-	{"L_Ranger", {10, 2.0f, 50, {250, 30, 1.0f, 4.0f, "L_Ranger", 0, 0, 0, 3.0f, true, 3}}}
+	{"L_Tank", {10, 0.8f, 50, {250, 20, 1.0f, 1.5f, "L_Tank", 0, 0, 0, 2.5, true, 1.5f}}},
+	{"L_Ranger", {10, 2.0f, 50, {250, 30, 1.0f, 4.0f, "L_Ranger", 0, 0, 0, 3.0f, true, 1.5f}}}
 };
 
 // 左方AI使用的角色
 const vector<CharacterConfig> characterTable_enemy
 {
 	// name, speed, delay, kb, hp, att, attCD, range, sprite, x, y, z, size, enemy, diedelay
-	{"L_Tank", {10, 0.8f, 50, {250, 20, 1.0f, 1.5f, "L_Tank", 0, 0, 0, 2.5, true, 3}}},
-	{"L_Ranger", {10, 2.0f, 50, {250, 30, 1.0f, 4.0f, "L_Ranger", 0, 0, 0, 3.0f, true, 3}}},
-	{"L_Tank", {10, 0.8f, 50, {250, 20, 1.0f, 1.5f, "L_Tank", 0, 0, 0, 2.5, true, 3}}}
+	{"L_Tank", {10, 0.8f, 50, {250, 20, 1.0f, 1.5f, "L_Tank", 0, 0, 0, 2.5, true, 1.5f}}},
+	{"L_Ranger", {10, 2.0f, 50, {250, 30, 1.0f, 4.0f, "L_Ranger", 0, 0, 0, 3.0f, true, 1.5f}}},
+	{"L_Tank", {10, 0.8f, 50, {250, 20, 1.0f, 1.5f, "L_Tank", 0, 0, 0, 2.5, true, 1.5f}}}
 };
 
 static class GameState

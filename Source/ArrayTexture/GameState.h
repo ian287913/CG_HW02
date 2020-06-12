@@ -15,17 +15,17 @@ struct CharacterConfig
 const vector<CharacterConfig> characterTable
 {
 	// name, speed, delay, kb, hp, att, attCD, range, sprite, x, y, z, size, enemy, diedelay
-	{"L_Tank", {10, 0.8f, 50, {250, 20, 1.0f, 1.5f, "L_Tank", 0, 0, 0, 2.5, true, 3}}},
-	{"L_Ranger", {10, 2.0f, 50, {250, 30, 1.0f, 4.0f, "L_Ranger", 0, 0, 0, 3.0f, true, 3}}}
+	{"L_Tank", {10, 0.8f, 50, {250, 20, 1.0f, 1.5f, "L_Tank", 0, 0, 0, 2.5, true, 1.5f}}},
+	{"L_Ranger", {10, 2.0f, 50, {250, 30, 1.0f, 4.0f, "L_Ranger", 0, 0, 0, 3.0f, true, 1.5f}}}
 };
 
 // 左方AI使用的角色
 const vector<CharacterConfig> characterTable_enemy
 {
 	// name, speed, delay, kb, hp, att, attCD, range, sprite, x, y, z, size, enemy, diedelay
-	{"L_Tank", {10, 0.8f, 50, {250, 20, 1.0f, 1.5f, "L_Tank", 0, 0, 0, 2.5, true, 3}}},
-	{"L_Ranger", {10, 2.0f, 50, {250, 30, 1.0f, 4.0f, "L_Ranger", 0, 0, 0, 3.0f, true, 3}}},
-	{"L_Tank", {10, 0.8f, 50, {250, 20, 1.0f, 1.5f, "L_Tank", 0, 0, 0, 2.5, true, 3}}}
+	{"L_Tank", {10, 0.8f, 50, {250, 20, 1.0f, 1.5f, "L_Tank", 0, 0, 0, 2.5, true, 1.5f}}},
+	{"L_Ranger", {10, 2.0f, 50, {250, 30, 1.0f, 4.0f, "L_Ranger", 0, 0, 0, 3.0f, true, 1.5f}}},
+	{"L_Tank", {10, 0.8f, 50, {250, 20, 1.0f, 1.5f, "L_Tank", 0, 0, 0, 2.5, true, 1.5f}}}
 };
 
 static class GameState
@@ -73,6 +73,7 @@ protected:
 	bool constructed = false;
 	// update呼叫的敵方AI
 	void EnemyAI(float deltaTime);
+	void KillAll(bool toEnemy);
 };
 
 // 參數定義
@@ -179,12 +180,14 @@ void GameState::Update(float deltaTime)
 		{
 			// 勝利
 			cout << "----------------Player Wins!!----------------" << endl;
+			KillAll(true);
 			GameOver = true;
 		}
 		else if(rightTower->hp <= 0)
 		{
 			// 勝利
 			cout << "----------------AI Wins!!----------------" << endl;
+			KillAll(false);
 			GameOver = true;
 		}
 	}
@@ -215,6 +218,19 @@ void GameState::EnemyAI(float deltaTime)
 	}
 	
 	
+}
+
+void GameState::KillAll(bool toEnemy)
+{
+	for (int i = BattleObject::allObjects.size() - 1; i >= 0; i--)
+	{
+		if (toEnemy && BattleObject::allObjects[i]->facing > 0)
+		{
+			BattleObject::allObjects[i]->Damage(BattleObject::allObjects[i]->hp);
+		}
+		else if (!toEnemy && BattleObject::allObjects[i]->facing < 0)
+			BattleObject::allObjects[i]->Damage(BattleObject::allObjects[i]->hp);
+	}
 }
 
 GameState::GameState()
@@ -250,7 +266,7 @@ GameState::GameState()
 	{
 		// HP, attack, attackCD, attackrange {string character; pos; height; dist; sizescale; facingRight; dieTime; }
 		BOConfig config = { towerHP, towerAttack, laserCD, 10, "L_Tower", rightSpawnPos, 0, spawnDistance, 5, false, 100 };
-		leftTower = new Tower(config, false);
+		rightTower = new Tower(config, false);
 	}
 	constructed = true;
 }
@@ -260,6 +276,8 @@ GameState::~GameState()
 	cout << "Game: destructing..." << endl;
 	for (int i = GameObject::actors.size() - 1; i >= 0; i--)
 	{
-		GameObject::actors[i]->StartDestroy();
+		delete GameObject::actors[i];
 	}
+	GameObject::actors = vector<GameObject*>();
+	BattleObject::allObjects = vector<BattleObject*>();
 }

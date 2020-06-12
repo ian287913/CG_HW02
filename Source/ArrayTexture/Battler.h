@@ -16,7 +16,7 @@ struct BattlerConfig
 };
 
 // 會自動移動, 攻擊的單位
-class Battler : BattleObject
+class Battler : public BattleObject
 {
 public:
 	float speed;

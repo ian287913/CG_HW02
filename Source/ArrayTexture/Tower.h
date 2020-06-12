@@ -2,7 +2,7 @@
 #include "BattleObject.h"
 
 // 不移動, 被動攻擊, 會只會受傷的單位
-class Tower : BattleObject
+class Tower : public BattleObject
 {
 public:
 	bool isEnemy;

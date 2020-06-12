@@ -414,16 +414,20 @@ void My_Keyboard(unsigned char key, int x, int y)
 		animations[CharacterIndex]->SetCurrentSet("die");
 		break;
 	case '6':
-		myGameState->AddBattler("L_Tank", true);
+		myGameState->AddBattler(0, true);
 		break;
 	case '7':
 		myGameState->AddBattler("L_Tank", false);
 		break;
 	case '8':
-		myGameState->AddBattler("L_Ranger", true);
+		myGameState->AddBattler(1, true);
 		break;
 	case '9':
 		myGameState->AddBattler("L_Ranger", false);
+		break;
+	case '0':
+		myGameState->enableEnemyAI = !myGameState->enableEnemyAI;
+		cout << "Game: AI " << ((myGameState->enableEnemyAI) ? "Enabled" : "Disabled") << endl;
 		break;
 	default:
 		break;

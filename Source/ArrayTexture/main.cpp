@@ -19,7 +19,9 @@ struct
 {
 	GLint  mv_matrix;
 	GLint  proj_matrix;
+	GLint  fading;
 } uniforms;
+
 
 const std::string ProjectName = "Project2_2DGame";
 const std::string ShaderPath = "./Shader/ArrayTexture/";
@@ -160,6 +162,7 @@ void My_Init()
 	//Cache uniform variable id
 	uniforms.proj_matrix = glGetUniformLocation(program, "um4p");
 	uniforms.mv_matrix = glGetUniformLocation(program, "um4mv");
+	uniforms.fading = glGetUniformLocation(program, "fading");
 
 	glUseProgram(program);
 	///////////////////////////	
@@ -201,6 +204,8 @@ void DrawAnimation(Animation* anim, glm::mat4 _matrix)
 	///	anchor½Õ¾ã¥Î:
 	///glUniformMatrix4fv(uniforms.mv_matrix, 1, GL_FALSE, value_ptr(m_camera.GetViewMatrix() * m_camera.GetModelMatrix() * _matrix * translate(0, debug_x, 0) * anim->spriteSheet->GetModelMat()));
 	glUniformMatrix4fv(uniforms.proj_matrix, 1, GL_FALSE, value_ptr(m_camera.GetProjectionMatrix(aspect)));
+	glUniform1f(uniforms.fading, debug_x);
+
 	glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, 1);
 	anim->Disable();
 
@@ -229,6 +234,7 @@ void DrawSprite(Sprite2D* _sprite, glm::mat4 _parentMatrix, const vec3& _positio
 	_sprite->Enable();
 	glUniformMatrix4fv(uniforms.mv_matrix, 1, GL_FALSE, value_ptr(m_camera.GetViewMatrix() * m_camera.GetModelMatrix() * _parentMatrix * translate(_position) * scale(_scale) * _sprite->GetModelMat()));
 	glUniformMatrix4fv(uniforms.proj_matrix, 1, GL_FALSE, value_ptr(m_camera.GetProjectionMatrix(aspect)));
+	glUniform1f(uniforms.fading, 0.0f);
 	glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, 1);
 	_sprite->Disable();
 
@@ -336,7 +342,7 @@ void My_Mouse(int button, int state, int x, int y)
 {
 	m_camera.mouseEvents(button, state, x, y);
 
-	if (button == GLUT_LEFT_BUTTON)
+	/*if (button == GLUT_LEFT_BUTTON)
 	{
 		if (state == GLUT_DOWN)
 		{
@@ -351,14 +357,14 @@ void My_Mouse(int button, int state, int x, int y)
 	{
 		printf("Mouse %d is pressed\n", button);
 	}
-	printf("%d %d %d %d\n", button, state, x, y);
+	printf("%d %d %d %d\n", button, state, x, y);*/
 }
 
 //Keyboard event
 void My_Keyboard(unsigned char key, int x, int y)
 {
 	///m_camera.keyEvents(key);
-	printf("Key %c is pressed at (%d, %d)\n", key, x, y);
+	//printf("Key %c is pressed at (%d, %d)\n", key, x, y);
 
 	switch (key)
 	{

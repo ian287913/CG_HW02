@@ -250,7 +250,7 @@ GameState::GameState()
 	{
 		// HP, attack, attackCD, attackrange {string character; pos; height; dist; sizescale; facingRight; dieTime; }
 		BOConfig config = { towerHP, towerAttack, laserCD, 10, "L_Tower", rightSpawnPos, 0, spawnDistance, 5, false, 100 };
-		leftTower = new Tower(config, false);
+		rightTower = new Tower(config, false);
 	}
 	constructed = true;
 }

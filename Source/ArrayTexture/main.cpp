@@ -42,8 +42,6 @@ float updateSpeed = 1.0f;
 
 Sprite2D* ShadowSprite;
 Sprite2D* BackgroundSprite;
-ParticleSystem* particleSystem;
-ParticleSystem particle;
 
 float imageScale = 1.0f;
 float debug_x = 0.0f;
@@ -111,11 +109,11 @@ void InitParticle()
 {
 	ParticleSystem::InitShaderSystem(ShaderPath);
 	ParticleSystem::InitSpriteTable(ImagePath);
-	particleSystem = new ParticleSystem("Fire");
-	particleSystem->mPosition = vec3(2.5f, -1, 0);
-	particleSystem->SetAttributes(100, 5, 0.2f, 1, 1);
 
-	particle = ParticleSystem("Hit");
+	/*particleSystem = new ParticleSystem("Fire");
+	particleSystem->mPosition = vec3(2.5f, -1, 0);
+	particleSystem->SetAttributes(8, 100, 1, 1, 2.0f, 4, 1.0f);*/
+
 }
 
 void My_Init()
@@ -245,8 +243,7 @@ void My_Display()
 
 	////////////////	Draw foreground		//////////////////////////////////////////////
 
-	particleSystem->Render(m_camera, aspect);
-	particle.Render(m_camera, aspect);
+	ParticleSystem::RenderInstances(m_camera, aspect);
 
 	////////////////	Draw UI				//////////////////////////////////////////////
 
@@ -270,6 +267,8 @@ void My_Timer(int val)
 	if (!pauseAnimation)
 	{
 		animations[CharacterIndex]->Elapse(((float)UPDATE_CYCLE) * updateSpeed);
+		//	ParticleSystem
+		ParticleSystem::UpdateInstances(((float)UPDATE_CYCLE) * updateSpeed);
 	}
 
 	glutPostRedisplay();
@@ -308,6 +307,7 @@ void My_Keyboard(unsigned char key, int x, int y)
 	switch (key)
 	{
 	case 'w':
+		ParticleSystem::CreateInstance("Fire", 8000, 5, 0.05f, 0, 16.0f, 0.5, 0.3f);
 		debug_y += 0.2f;
 		cout << "debug_y = " << debug_y << "\n";
 		break;

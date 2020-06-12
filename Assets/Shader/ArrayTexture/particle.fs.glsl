@@ -8,9 +8,12 @@ in VertexData
 	flat int spriteIndex;
 } vertexData;
 
+in float fadeCoef;
+
 uniform sampler2DArray tex;
 
 void main()
 {
 	fragColor = texture(tex, vec3(vertexData.texcoord, vertexData.spriteIndex));
+	fragColor.a *= fadeCoef;
 }

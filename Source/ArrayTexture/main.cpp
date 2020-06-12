@@ -6,6 +6,8 @@
 #include "SpriteObject.h"
 #include <vector>
 #include "GameState.h"
+#include "ParticleSystem.h"
+#include "TranslateRoteteScaleHelper.h"
 
 using namespace glm;
 using namespace std;
@@ -39,6 +41,8 @@ float updateSpeed = 1.0f;
 
 Sprite2D* ShadowSprite;
 Sprite2D* BackgroundSprite;
+ParticleSystem* particleSystem;
+ParticleSystem particle;
 
 float imageScale = 1.0f;
 float debug_x = 0.0f;
@@ -54,48 +58,6 @@ GLuint vao;
 GLuint vbo;
 GLuint ebo;
 
-#define DOR(angle) (angle*3.1415/180);
-mat4 translate(float x, float y, float z) {
-	vec4 t = vec4(x, y, z, 1);//w = 1 ,則x,y,z=0時也能translate
-	vec4 c1 = vec4(1, 0, 0, 0);
-	vec4 c2 = vec4(0, 1, 0, 0);
-	vec4 c3 = vec4(0, 0, 1, 0);
-	mat4 M = mat4(c1, c2, c3, t);
-	return M;
-}
-mat4 scale(float x, float y, float z) {
-	vec4 c1 = vec4(x, 0, 0, 0);
-	vec4 c2 = vec4(0, y, 0, 0);
-	vec4 c3 = vec4(0, 0, z, 0);
-	vec4 c4 = vec4(0, 0, 0, 1);
-	mat4 M = mat4(c1, c2, c3, c4);
-	return M;
-}
-mat4 rotate(float angle, float x, float y, float z) {
-	float r = DOR(angle);
-	mat4 M = mat4(1);
-
-	vec4 c1 = vec4(cos(r) + (1 - cos(r))*x*x, (1 - cos(r))*y*x + sin(r)*z, (1 - cos(r))*z*x - sin(r)*y, 0);
-	vec4 c2 = vec4((1 - cos(r))*y*x - sin(r)*z, cos(r) + (1 - cos(r))*y*y, (1 - cos(r))*z*y + sin(r)*x, 0);
-	vec4 c3 = vec4((1 - cos(r))*z*x + sin(r)*y, (1 - cos(r))*z*y - sin(r)*x, cos(r) + (1 - cos(r))*z*z, 0);
-	vec4 c4 = vec4(0, 0, 0, 1);
-	M = mat4(c1, c2, c3, c4);
-	return M;
-}
-
-float RandomFloat(float lo, float hi)
-{
-	return linearRand(lo, hi);
-}
-glm::vec2 RandomPosition(float xRange, float yRange)
-{
-	float r = RandomFloat(1.0f, 1000.0f);
-	vec2 pos = diskRand(r);
-	pos.x *= xRange / r;
-	pos.y *= yRange / r;
-
-	return pos;
-}
 
 void SetVaoVbo()
 {
@@ -149,6 +111,17 @@ void My_LoadTextures()
 	return;
 }
 
+void InitParticle()
+{
+	ParticleSystem::InitShaderSystem(ShaderPath);
+	ParticleSystem::InitSpriteTable(ImagePath);
+	particleSystem = new ParticleSystem("Fire");
+	particleSystem->mPosition = vec3(2.5f, -1, 0);
+	particleSystem->SetAttributes(100, 5, 0.2f, 1, 1);
+
+	particle = ParticleSystem("Hit");
+}
+
 void My_Init()
 {
 	glEnable(GL_TEXTURE_2D);
@@ -191,6 +164,10 @@ void My_Init()
 	//Load model to shader program
 	My_LoadTextures();
 	SetVaoVbo();
+
+	//	init particle shader
+	InitParticle();
+
 	m_camera.ToggleOrtho();
 	m_camera.Zoom(64);
 
@@ -294,7 +271,8 @@ void My_Display()
 
 	////////////////	Draw foreground		//////////////////////////////////////////////
 
-
+	particleSystem->Render(m_camera, aspect);
+	particle.Render(m_camera, aspect);
 
 	////////////////	Draw UI				//////////////////////////////////////////////
 

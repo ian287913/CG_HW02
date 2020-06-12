@@ -242,6 +242,13 @@ void DrawSprite(Sprite2D* _sprite, glm::mat4 _parentMatrix, const vec3& _positio
 	glUseProgram(0);
 }
 
+void ResetGameState()
+{
+	delete myGameState;
+	myGameState = NULL;
+	myGameState = new GameState();
+}
+
 // GLUT callback. Called to draw the scene.
 void My_Display()
 {
@@ -257,45 +264,51 @@ void My_Display()
 	//mat4 parentMatrix = translate(0, 0, 0) * scale(1, 1, 1);
 	mat4 parentMatrix = animations[CharacterIndex]->anchorTranslate;
 	DrawSprite(ShadowSprite, parentMatrix, vec3(animations[CharacterIndex]->shadowOffsetX, animations[CharacterIndex]->shadowOffsetY, 0), vec3(animations[CharacterIndex]->shadowScale, animations[CharacterIndex]->shadowScale, 1));
-	for (int i = GameObject::actors.size() - 1; i >= 0; i--)
+	if (myGameState != NULL)
 	{
-		GameObject* go = GameObject::actors[i];
-		// draw
-		mat4 trans = translate(go->position, go->distance * GameObject::depthRatio, 0)
-			* scale(go->scale * go->facing, go->scale, 1);
-		DrawSprite(
-			ShadowSprite,
-			trans * go->sprite->anchorTranslate,
-			vec3(go->sprite->shadowOffsetX,
-				go->sprite->shadowOffsetY, 0),
-			vec3(go->sprite->shadowScale,
-				go->sprite->shadowScale, 1),
-			go->fading
-		);
+		for (int i = GameObject::actors.size() - 1; i >= 0; i--)
+		{
+			GameObject* go = GameObject::actors[i];
+			// draw
+			mat4 trans = translate(go->position, go->distance * GameObject::depthRatio, 0)
+				* scale(go->scale * go->facing, go->scale, 1);
+			DrawSprite(
+				ShadowSprite,
+				trans * go->sprite->anchorTranslate,
+				vec3(go->sprite->shadowOffsetX,
+					go->sprite->shadowOffsetY, 0),
+				vec3(go->sprite->shadowScale,
+					go->sprite->shadowScale, 1),
+				go->fading
+			);
+		}
 	}
 
 	////////////////	Draw characters		//////////////////////////////////////////////
 
 	DrawAnimation(animations[CharacterIndex], parentMatrix);
-	vector<GameObject*> sortedGO = GameObject::actors;
-	for (int i = sortedGO.size() - 1; i >= 0; i--)
+	if (myGameState != NULL)
 	{
-		GameObject* go = sortedGO[i];
-		for (int j = i - 1; j >= 0; j--)
+		vector<GameObject*> sortedGO = GameObject::actors;
+		for (int i = sortedGO.size() - 1; i >= 0; i--)
 		{
-			GameObject* goCompare = sortedGO[j];
-			if (goCompare->distance > go->distance)
+			GameObject* go = sortedGO[i];
+			for (int j = i - 1; j >= 0; j--)
 			{
-				// switch
-				sortedGO[i] = goCompare;
-				sortedGO[j] = go;
-				go = goCompare;
+				GameObject* goCompare = sortedGO[j];
+				if (goCompare->distance > go->distance)
+				{
+					// switch
+					sortedGO[i] = goCompare;
+					sortedGO[j] = go;
+					go = goCompare;
+				}
 			}
+			// draw
+			mat4 trans = translate(go->position, go->height + go->distance * GameObject::depthRatio, 0)
+				* scale(go->scale * go->facing, go->scale, 1);
+			DrawAnimation(go->sprite, trans * go->sprite->anchorTranslate, go->fading);
 		}
-		// draw
-		mat4 trans = translate(go->position, go->height + go->distance * GameObject::depthRatio, 0) 
-			* scale(go->scale * go->facing, go->scale, 1);
-		DrawAnimation(go->sprite, trans * go->sprite->anchorTranslate, go->fading);
 	}
 
 	////////////////	Draw foreground		//////////////////////////////////////////////
@@ -436,6 +449,10 @@ void My_Keyboard(unsigned char key, int x, int y)
 	case '0':
 		myGameState->enableEnemyAI = !myGameState->enableEnemyAI;
 		cout << "Game: AI " << ((myGameState->enableEnemyAI) ? "Enabled" : "Disabled") << endl;
+		break;
+	case 'r':
+		ResetGameState();
+		cout << "Reset Game" << endl;
 		break;
 	default:
 		break;

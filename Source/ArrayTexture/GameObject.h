@@ -77,7 +77,7 @@ GameObject::GameObject(string character, float pos, float high, float dist, floa
 }
 GameObject::~GameObject()
 {
-	// cout << "GameObject " << this->id << ": destructing..." << endl;
+	cout << "GameObject " << this->id << ": destructing..." << endl;
 	actors.erase(actors.begin() + this->id);
 	this->rearangeID();
 	delete this->sprite;

@@ -84,7 +84,7 @@ BattleObject::BattleObject(BOConfig config) : GameObject(config.character, confi
 BattleObject::~BattleObject()
 {
 	// no need
-	// cout << "BattleObject " << this->id << ": destructing..." << endl;
+	cout << "BattleObject " << this->id << ": destructing..." << endl;
 }
 void BattleObject::Die()
 {

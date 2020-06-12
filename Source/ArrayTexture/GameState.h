@@ -276,6 +276,8 @@ GameState::~GameState()
 	cout << "Game: destructing..." << endl;
 	for (int i = GameObject::actors.size() - 1; i >= 0; i--)
 	{
-		GameObject::actors[i]->StartDestroy();
+		delete GameObject::actors[i];
 	}
+	GameObject::actors = vector<GameObject*>();
+	BattleObject::allObjects = vector<BattleObject*>();
 }

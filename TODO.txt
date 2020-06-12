@@ -1,3 +1,7 @@
 Particle scaling
 
 character sprite offset
+
+die shader
+
+frame buffer

@@ -38,6 +38,7 @@ protected:
 
 Battler::Battler(BattlerConfig config): BattleObject(config.bof)
 {
+	cout << "Battler " << this->id << ": constructing..." << endl;
 	this->speed = config.speed;
 	this->attackDelay = config.attackDelay;
 	this->state = BattlerState::idle;
@@ -49,6 +50,7 @@ Battler::Battler(BattlerConfig config): BattleObject(config.bof)
 Battler::~Battler()
 {
 	// no need
+	cout << "Battler " << this->id << ": destructing..." << endl;
 }
 void Battler::Update(float deltaTime)
 {
@@ -58,6 +60,7 @@ void Battler::Update(float deltaTime)
 }
 float Battler::Damage(float amount)
 {
+	cout << "Battler " << this->id << ": get damage: " << amount << endl;
 	this->hp -= amount;
 	if (amount <= 0 && !isDying)
 	{
@@ -88,10 +91,12 @@ void Battler::AI(float deltaTime)
 			BattleObject* target = FindTarget();
 			if (target == NULL)
 			{
+				cout << "Battler " << this->id << ": state run" << endl;
 				this->state = BattlerState::run;
 			}
 			else
 			{
+				cout << "Battler " << this->id << ": state pre-attack" << endl;
 				this->state = BattlerState::preAttack;
 				this->attackTimer = attackDelay;
 			}
@@ -102,6 +107,7 @@ void Battler::AI(float deltaTime)
 		BattleObject* target = FindTarget();
 		if (target != NULL)
 		{
+			cout << "Battler " << this->id << ": state preAttack" << endl;
 			this->state = BattlerState::preAttack;
 		}
 	}
@@ -111,6 +117,7 @@ void Battler::AI(float deltaTime)
 		BattleObject* target = FindTarget();
 		if (target == NULL)
 		{
+			cout << "Battler " << this->id << ": state idle" << endl;
 			this->state = BattlerState::idle;
 		}
 		else
@@ -118,6 +125,7 @@ void Battler::AI(float deltaTime)
 			if (this->attackTimer <= 0)
 			{
 				this->Attack(target);
+				cout << "Battler " << this->id << ": state idle" << endl;
 				this->state = BattlerState::idle;
 				this->CDTimer = this->attackCD;
 			}
@@ -130,11 +138,13 @@ void Battler::AI(float deltaTime)
 		{
 			if (this->hp > 0)
 			{
+				cout << "Battler " << this->id << ": state run" << endl;
 				this->state = BattlerState::run;
 				KBingRange = 0;
 			}
 			else
 			{
+				cout << "Battler " << this->id << ": state die" << endl;
 				this->state = BattlerState::die;
 				this->Die();
 			}
@@ -193,7 +203,7 @@ BattleObject* Battler::FindTarget()
 	for (int i = allObjects.size() - 1; i >= 0; i--)
 	{
 		// 特別不檢查每個人的hp是否為0, 因為tower hp為0 還是照打
-		if (allObjects[i]->GameObject::id == this->id)
+		if (allObjects[i]->GameObject::id == this->id || this->facing * allObjects[i]->GameObject::facing >= 0)
 			continue;
 		float dist = abs(allObjects[i]->GameObject::position - this->position);
 		if (dist < this->attackRange && (closestDist < 0 || closestDist > dist))

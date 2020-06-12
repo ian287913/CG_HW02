@@ -8,6 +8,7 @@ public:
 	static float timeScale;				// 所有人的時間縮放
 	static bool stopTime;				// 所有人的時間是否靜止 (優先權高於縮放)
 	static vector<GameObject*> actors;	// 此遊戲的所有單位
+	static const float depthRatio;		// 深度與y軸的轉換比例
 	int id;								// 在actors裡的id
 	Animation* sprite;					// 角色的圖像資訊
 	float position;						// x座標的位置, 左至右成長
@@ -30,6 +31,7 @@ protected:
 float GameObject::timeScale = 1.0f;
 bool GameObject::stopTime = false;
 vector<GameObject*> GameObject::actors = vector<GameObject*>();
+const float GameObject::depthRatio = 0.5f;
 
 void GameObject::Update(float deltaTime)
 {
@@ -42,6 +44,7 @@ void GameObject::Update(float deltaTime)
 			delete this;
 		}
 	}
+	this->sprite->Elapse(deltaTime);
 }
 
 GameObject::GameObject(string character, float pos, float high, float dist, float sizescale, bool facingRight, float dieTime)
@@ -56,11 +59,12 @@ GameObject::GameObject(string character, float pos, float high, float dist, floa
 	this->isDying = false;
 	this->id = actors.size();
 
+	cout << "GameObject " << this->id << ": constructing..." << endl;
 	actors.push_back(this);
 }
 GameObject::~GameObject()
 {
-
+	cout << "GameObject " << this->id << ": destructing..." << endl;
 	actors.erase(actors.begin() + this->id);
 	delete this->sprite;
 	this->sprite = NULL;
@@ -68,5 +72,6 @@ GameObject::~GameObject()
 
 void GameObject::StartDestroy()
 {
+	cout << "GameObject " << this->id << ": Start destroy" << endl;
 	isDying = true;
 }

@@ -70,9 +70,6 @@
     <ClInclude Include="..\..\Source\ArrayTexture\AnimationConfig.h">
       <Filter>標頭檔</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\ArrayTexture\ParticleSystem.h">
-      <Filter>標頭檔</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\Source\ArrayTexture\BattleObject.h">
       <Filter>標頭檔</Filter>
     </ClInclude>
@@ -83,6 +80,9 @@
       <Filter>標頭檔</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\ArrayTexture\Tower.h">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\ArrayTexture\GameState.h">
       <Filter>標頭檔</Filter>
     </ClInclude>
   </ItemGroup>

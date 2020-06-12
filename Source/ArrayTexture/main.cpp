@@ -5,8 +5,7 @@
 #include "Sprite2D.h"
 #include "SpriteObject.h"
 #include <vector>
-#include "Tower.h"
-#include "Battler.h"
+#include "GameState.h"
 
 using namespace glm;
 using namespace std;
@@ -44,6 +43,10 @@ Sprite2D* BackgroundSprite;
 float imageScale = 1.0f;
 float debug_x = 0.0f;
 float debug_y = 0.0f;
+//
+
+//  will
+GameState* myGameState;
 //
 
 
@@ -190,6 +193,9 @@ void My_Init()
 	SetVaoVbo();
 	m_camera.ToggleOrtho();
 	m_camera.Zoom(64);
+
+	// will
+	myGameState = new GameState();
 }
 
 //	Draw a single animation (character)
@@ -266,6 +272,25 @@ void My_Display()
 	////////////////	Draw characters		//////////////////////////////////////////////
 
 	DrawAnimation(animations[CharacterIndex], parentMatrix);
+	vector<GameObject*> sortedGO = GameObject::actors;
+	for (int i = sortedGO.size() - 1; i >= 0; i--)
+	{
+		GameObject* go = sortedGO[i];
+		for (int j = i - 1; j >= 0; j--)
+		{
+			GameObject* goCompare = sortedGO[j];
+			if (goCompare->distance < go->distance)
+			{
+				// switch
+				sortedGO[i] = goCompare;
+				sortedGO[j] = go;
+				go = goCompare;
+			}
+		}
+		// draw
+		mat4 trans = translate(go->position, go->height + go->distance * GameObject::depthRatio, 0) * scale(go->scale * go->facing, go->scale, 1);
+		DrawAnimation(go->sprite, trans);
+	}
 
 	////////////////	Draw foreground		//////////////////////////////////////////////
 
@@ -293,6 +318,11 @@ void My_Timer(int val)
 	if (!pauseAnimation)
 	{
 		animations[CharacterIndex]->Elapse(((float)UPDATE_CYCLE) * updateSpeed);
+	}
+
+	if (myGameState != NULL)
+	{
+		myGameState->Update(((float)UPDATE_CYCLE) * updateSpeed);
 	}
 
 	glutPostRedisplay();
@@ -432,6 +462,7 @@ int main(int argc, char *argv[])
 	////////////////////
 
 	// Enter main event loop.
+
 	glutMainLoop();
 
 	cout << "after loop\n";

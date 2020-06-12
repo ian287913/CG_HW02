@@ -231,8 +231,8 @@ void ViewManager::mouseMoveEvent(int x,int y)
         vec2 coord = vec2(x, y);
 		vec2 diff = coord - lmbDownCoord;
         float factor = 0.002f;
-        rotationMatrix = rotate(rotationMatrix,diff.x * factor, rotateYAxis);
-        rotationMatrix = rotate(rotationMatrix,diff.y * factor, rotateXAxis);
+        ///rotationMatrix = rotate(rotationMatrix,diff.x * factor, rotateYAxis);
+        ///rotationMatrix = rotate(rotationMatrix,diff.y * factor, rotateXAxis);
         lmbDownCoord = coord;
     }
 	else if(midDown)

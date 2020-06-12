@@ -59,6 +59,8 @@
     <None Include="..\..\Assets\Shader\ArrayTexture\vertex.vs.glsl">
       <Filter>Shaders</Filter>
     </None>
+    <None Include="..\..\Assets\Shader\ArrayTexture\particle.fs.glsl" />
+    <None Include="..\..\Assets\Shader\ArrayTexture\particle.vs.glsl" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Source\ArrayTexture\Sprite2D.h">
@@ -80,6 +82,12 @@
       <Filter>標頭檔</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\ArrayTexture\Tower.h">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\ArrayTexture\ParticleSystem.h">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\ArrayTexture\TranslateRoteteScaleHelper.h">
       <Filter>標頭檔</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\ArrayTexture\GameState.h">

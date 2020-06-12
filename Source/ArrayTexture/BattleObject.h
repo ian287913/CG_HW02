@@ -65,7 +65,7 @@ void BattleObject::Update(float deltaTime)
 	this->GameObject::Update(deltaTime);
 	if (CDTimer > 0 && !stopTime)
 	{
-		CDTimer -= deltaTime * timeScale;
+		CDTimer -= deltaTime * timeScale * 0.001f;
 	}
 }
 
@@ -77,6 +77,9 @@ BattleObject::BattleObject(BOConfig config) : GameObject(config.character, confi
 	this->attackCD = config.attackCD;
 	this->attackRange = config.attackRange;
 	this->CDTimer = 0;
+	this->id_bo = allObjects.size();
+
+	allObjects.push_back(this);
 }
 BattleObject::~BattleObject()
 {

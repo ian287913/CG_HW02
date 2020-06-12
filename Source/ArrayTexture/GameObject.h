@@ -35,16 +35,16 @@ const float GameObject::depthRatio = 0.5f;
 
 void GameObject::Update(float deltaTime)
 {
+	this->sprite->Elapse(deltaTime);
 	// ¨C´Vcallªºfunction
 	if (isDying)
 	{
-		dyingTimer -= deltaTime;
+		dyingTimer -= deltaTime * 0.001f;
 		if (dyingTimer < 0)
 		{
 			delete this;
 		}
 	}
-	this->sprite->Elapse(deltaTime);
 }
 
 GameObject::GameObject(string character, float pos, float high, float dist, float sizescale, bool facingRight, float dieTime)

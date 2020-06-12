@@ -12,7 +12,8 @@ struct CharacterConfig
 
 const vector<CharacterConfig> characterTable
 {
-	
+	// name, speed, delay, kb, hp, att, attCD, range, sprite, x, y, z, size, enemy, diedelay
+	{"L_Tank", {10, 0.8f, 50, {250, 20, 1.0f, 1.0f, "L_Tank", 0, 0, 0, 2, true, 3}}}
 };
 
 static class GameState
@@ -41,7 +42,7 @@ public:
 	// 升級金錢
 	void LevelUp();
 	// 新增單一兵種
-	void AddBattler(string name, bool isEnemy = false);
+	Battler* AddBattler(string name, bool isEnemy = false);
 	// 更新所有的GameObject
 	void Update(float deltaTime);
 	GameState();
@@ -63,7 +64,7 @@ const int GameState::rateMoney_level[LVLNUM] = {50, 100, 150, 200, 250};
 const float GameState::leftSpawnPos = -7;
 const float GameState::rightSpawnPos = 7;
 const float GameState::spawnDistance = -3;
-const float GameState::spawnDistanceRange = 0.5f;
+const float GameState::spawnDistanceRange = 0.1f;
 const float GameState::towerHP = 1000;
 const float GameState::towerAttack = 10000;
 
@@ -88,8 +89,22 @@ void GameState::LevelUp()
 	}
 }
 
-void GameState::AddBattler(string name, bool isEnemy)
+Battler* GameState::AddBattler(string name, bool isEnemy)
 {
+	for (int i = 0; i < characterTable.size(); i++)
+	{
+		if (characterTable[i].name == name)
+		{
+			cout << "Game: Add Battler of " << name << endl;
+			BattlerConfig config = characterTable[i].config;
+			cout << "add battler's attack: " << config.bof.attack << endl;
+			config.bof.pos = isEnemy ? leftSpawnPos : rightSpawnPos;
+			config.bof.dist = spawnDistance + (spawnDistanceRange * 2) * rand() / (RAND_MAX + 1.0) - spawnDistanceRange;
+			config.bof.facingRight = isEnemy;
+			return new Battler(config);
+		}
+	}
+	return NULL;
 }
 
 void GameState::Update(float deltaTime)
@@ -142,11 +157,25 @@ GameState::GameState()
 	leftTower = NULL;
 	rightTower = NULL;
 
-	// 造塔
+	// 造塔 (左)
 	{
 		// HP, attack, attackCD, attackrange {string character; pos; height; dist; sizescale; facingRight; dieTime; }
 		BOConfig config = { towerHP, towerAttack, laserCD, 10, "L_Tower", leftSpawnPos, 0, spawnDistance, 5, true, 100 };
 		leftTower = new Tower(config, true);
+	}
+	// 造塔 (右)
+	{
+		// HP, attack, attackCD, attackrange {string character; pos; height; dist; sizescale; facingRight; dieTime; }
+		BOConfig config = { towerHP, towerAttack, laserCD, 10, "L_Tower", rightSpawnPos, 0, spawnDistance, 5, false, 100 };
+		leftTower = new Tower(config, true);
+	}
+
+	// test: 製作貓咪
+	{
+		// 敵方
+		this->AddBattler("L_Tank", true);
+		// 友芳
+		this->AddBattler("L_Tank", false);
 	}
 }
 

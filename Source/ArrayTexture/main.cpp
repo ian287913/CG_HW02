@@ -245,6 +245,20 @@ void My_Display()
 	////////////////	Draw shadows		//////////////////////////////////////////////
 	mat4 parentMatrix = translate(0, -2, 0) * scale(2, 2, 1);
 	DrawSprite(ShadowSprite, parentMatrix, vec3(animations[CharacterIndex]->shadowOffsetX, animations[CharacterIndex]->shadowOffsetY, 0), vec3(animations[CharacterIndex]->shadowScale, animations[CharacterIndex]->shadowScale, 1));
+	for (int i = GameObject::actors.size() - 1; i >= 0; i--)
+	{
+		GameObject* go = GameObject::actors[i];
+		// draw
+		mat4 trans = translate(go->position, go->distance * GameObject::depthRatio, 0)
+			* scale(go->scale * go->facing, go->scale, 1);
+		DrawSprite(
+			ShadowSprite, 
+			trans, 
+			vec3(go->sprite->shadowOffsetX, 
+				go->sprite->shadowOffsetY, 0),
+			vec3(go->sprite->shadowScale,
+				go->sprite->shadowScale, 1));
+	}
 
 	////////////////	Draw characters		//////////////////////////////////////////////
 
@@ -256,7 +270,7 @@ void My_Display()
 		for (int j = i - 1; j >= 0; j--)
 		{
 			GameObject* goCompare = sortedGO[j];
-			if (goCompare->distance < go->distance)
+			if (goCompare->distance > go->distance)
 			{
 				// switch
 				sortedGO[i] = goCompare;
@@ -265,7 +279,8 @@ void My_Display()
 			}
 		}
 		// draw
-		mat4 trans = translate(go->position, go->height + go->distance * GameObject::depthRatio, 0) * scale(go->scale * go->facing, go->scale, 1);
+		mat4 trans = translate(go->position, go->height + go->distance * GameObject::depthRatio, 0) 
+			* scale(go->scale * go->facing, go->scale, 1);
 		DrawAnimation(go->sprite, trans);
 	}
 

@@ -1,7 +1,9 @@
 #pragma once
 #include "BattleObject.h"
 
+const float runSpeedRatio = 0.1f;
 const float KBRange = 1.0f;
+const float KBHeight = 0.3f;
 const float KBRatio = 0.25f;
 enum BattlerState {idle, run, preAttack, knockback, die};
 
@@ -29,6 +31,7 @@ protected:
 	float KBHP;
 	float KBingHP;
 	float attackTimer;
+	float originalHeight;
 	BattlerState state;
 	void AI(float deltaTime);
 	BattleObject* FindTarget();
@@ -46,6 +49,7 @@ Battler::Battler(BattlerConfig config): BattleObject(config.bof)
 	this->KBingHP = 0;
 	this->KBingRange = 0;
 	this->attackTimer = 0;
+	this->originalHeight = config.bof.height;
 }
 Battler::~Battler()
 {
@@ -73,6 +77,7 @@ float Battler::Damage(float amount)
 	{
 		KBingHP = 0;
 		this->state = BattlerState::knockback;
+		this->sprite->SetCurrentSet("hit");
 		this->KBingRange = 0;
 	}
 	
@@ -93,12 +98,14 @@ void Battler::AI(float deltaTime)
 			{
 				cout << "Battler " << this->id << ": state run" << endl;
 				this->state = BattlerState::run;
+				this->sprite->SetCurrentSet("run");
 			}
 			else
 			{
 				cout << "Battler " << this->id << ": state pre-attack" << endl;
 				this->state = BattlerState::preAttack;
 				this->attackTimer = attackDelay;
+				this->sprite->SetCurrentSet("attack");
 			}
 		}
 		break;
@@ -109,6 +116,8 @@ void Battler::AI(float deltaTime)
 		{
 			cout << "Battler " << this->id << ": state preAttack" << endl;
 			this->state = BattlerState::preAttack;
+			this->attackTimer = attackDelay;
+			this->sprite->SetCurrentSet("attack");
 		}
 	}
 		break;
@@ -119,6 +128,7 @@ void Battler::AI(float deltaTime)
 		{
 			cout << "Battler " << this->id << ": state idle" << endl;
 			this->state = BattlerState::idle;
+			this->sprite->SetCurrentSet("idle");
 		}
 		else
 		{
@@ -140,6 +150,7 @@ void Battler::AI(float deltaTime)
 			{
 				cout << "Battler " << this->id << ": state run" << endl;
 				this->state = BattlerState::run;
+				this->sprite->SetCurrentSet("run");
 				KBingRange = 0;
 			}
 			else
@@ -148,6 +159,7 @@ void Battler::AI(float deltaTime)
 				this->state = BattlerState::die;
 				this->Die();
 			}
+			this->height = this->originalHeight;
 		}
 	}
 		break;
@@ -170,25 +182,27 @@ void Battler::AI(float deltaTime)
 		break;
 	case BattlerState::run:
 	{
-		this->position += this->facing * deltaTime * speed;
+		this->position += this->facing * deltaTime * speed * runSpeedRatio * 0.001f;
+		// cout << "Battler " << this->id << ": pos: " << this->position << endl;
 	}
 	break;
 	case BattlerState::preAttack:
 	{
 		if (this->attackTimer > 0)
-			this->attackTimer -= deltaTime;
+			this->attackTimer -= deltaTime * 0.001f;
 	}
 	break;
 	case BattlerState::knockback:
 	{
-		this->position -= this->facing * deltaTime * speed;
-		KBingRange += deltaTime * speed;
+		this->position -= this->facing * deltaTime * speed * runSpeedRatio * 1.5f * 0.001f;
+		this->height = this->originalHeight + sinf(this->KBingRange / KBRange * 3.14159f);
+		KBingRange += deltaTime * speed * runSpeedRatio * 1.5f * 0.001f;
 	}
 	break;
 	case BattlerState::die:
 	{
 		// to die state
-		this->sprite->SetCurrentSet("die");
+		// this->sprite->SetCurrentSet("die");
 	}
 	break;
 	default:
@@ -206,6 +220,7 @@ BattleObject* Battler::FindTarget()
 		if (allObjects[i]->GameObject::id == this->id || this->facing * allObjects[i]->GameObject::facing >= 0)
 			continue;
 		float dist = abs(allObjects[i]->GameObject::position - this->position);
+		// cout << "finding... dist: " << dist << endl;
 		if (dist < this->attackRange && (closestDist < 0 || closestDist > dist))
 		{
 			closestDist = dist;

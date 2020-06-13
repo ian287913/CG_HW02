@@ -143,7 +143,7 @@ void ParticleSystem::InitShaderSystem(std::string shaderPath)
 	glGenBuffers(1, &vbo);
 
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(pos) + sizeof(frame) + sizeof(scale) + sizeof(rotation), NULL, GL_DYNAMIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(pos) + sizeof(frame) + sizeof(scale) + sizeof(rotation) + sizeof(direction), NULL, GL_DYNAMIC_DRAW);
 
 	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(pos), pos);
 	glEnableVertexAttribArray(0);
@@ -250,7 +250,7 @@ void ParticleSystem::SetAttributes(float _lifeTime, int _amount, float _spawnRad
 		layouts.pos[i] = RandomPointRadius(spawnRadius_Min, spawnRadius_Max);
 		layouts.scale[i] = RandomFloat(0.5f, 0.5f);
 		layouts.rotation[i] = RandomFloat(0.0f, 3.14159f * 2.0f);
-		layouts.direction[i] = vec2(1, 1);
+		layouts.direction[i] = vec2(0.1f, 0.1f);
 
 	}
 

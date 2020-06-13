@@ -384,7 +384,7 @@ void My_Keyboard(unsigned char key, int x, int y)
 	switch (key)
 	{
 	case 'w':
-		ParticleSystem::CreateInstance("Fire", 8000, 1, 0.0f, 0.0f, 2.0f, 1.0f, 0.3f);
+		ParticleSystem::CreateInstance("Fire", 8000, 10, 1.0f, 0.0f, 16.0f, 20.0f, 20.0f);
 		debug_y += 0.2f;
 		cout << "debug_y = " << debug_y << "\n";
 		break;

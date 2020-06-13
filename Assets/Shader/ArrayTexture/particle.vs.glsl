@@ -4,7 +4,7 @@ layout(location = 0) in vec2 offset;
 layout(location = 1) in int spriteIndex;
 layout(location = 2) in float scaling;
 layout(location = 3) in float rotation;
-layout(location = 4) in vec2 d_vector;
+layout(location = 4) in vec2 direction;
 
 uniform mat4 um4mv;
 uniform mat4 um4p;
@@ -31,10 +31,9 @@ vec2 RotateV2(vec2 v2, float radius)
 
 void main()
 {
-	//vec2 distance = offset + (direction * time * speed);
-	vec2 distance = offset + d_vector;
+	vec2 distance = offset + (direction * time * speed);
 
-	gl_Position = um4p * um4mv * vec4((RotateV2(points[gl_VertexID], rotation) * scaling) + distance + d_vector, 0.0, 1.0);
+	gl_Position = um4p * um4mv * vec4((RotateV2(points[gl_VertexID], rotation) * scaling) + distance, 0.0, 1.0);
 	vertexData.texcoord = uv[gl_VertexID];
 	vertexData.spriteIndex = spriteIndex;
 

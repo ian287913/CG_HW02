@@ -454,6 +454,9 @@ void My_Keyboard(unsigned char key, int x, int y)
 		ResetGameState();
 		cout << "Reset Game" << endl;
 		break;
+	case 'l':
+		myGameState->Laser();
+		break;
 	default:
 		break;
 	}

@@ -1,4 +1,5 @@
 #pragma once
+#include <iomanip>
 #include "Tower.h"
 #include "Battler.h"
 #define CHARNUM 5
@@ -33,6 +34,7 @@ static class GameState
 public:
 	static const float spawnCD[CHARNUM];
 	static const float laserCD;
+	static const float laserDelay;
 	static const float AICD;
 	static const float AICD_range;
 	static const int cost[CHARNUM];
@@ -69,16 +71,19 @@ protected:
 	float spawnCDing[CHARNUM];
 	float laserCDing;
 	float AICDing;
+	float laserTimer;
 	int allWeights;
 	bool constructed = false;
 	// update呼叫的敵方AI
 	void EnemyAI(float deltaTime);
 	void KillAll(bool toEnemy);
+	void LaserAttack();
 };
 
 // 參數定義
 const float GameState::spawnCD[CHARNUM] = {2, 2, 2, 2.5f, 5.0f};
 const float GameState::laserCD = 10;
+const float GameState::laserDelay = 2.0f;
 const float GameState::AICD = 10;
 const float GameState::AICD_range = 2.5f;
 const int GameState::cost[CHARNUM] = {75, 150, 300, 600, 1000};
@@ -97,8 +102,27 @@ const int GameState::enemySellectWeight[ENMYNUM] = {3, 1, 0};
 
 void GameState::Laser()
 {
-	cout << "Game: Use laser!"<< endl;
-	//特效與攻擊
+	if (laserCDing > 0)
+	{
+		cout << "Game: Can't use laser! CD: " << laserCDing << " second(s)." << endl;
+		return;
+	}
+	cout << "Game: Use laser!" << endl;
+	// 特效
+	// n秒後攻擊
+	laserTimer = laserDelay;
+	// 進cd
+	laserCDing = laserCD;
+}
+void GameState::LaserAttack()
+{
+	for (int i = BattleObject::allObjects.size() - 1; i >= 0; i--)
+	{
+		if (BattleObject::allObjects[i]->facing > 0 && (BattleObject::allObjects[i]->id_bo != leftTower->id_bo))
+		{
+			BattleObject::allObjects[i]->Damage(towerAttack);
+		}
+	}
 }
 
 void GameState::LevelUp()
@@ -134,7 +158,26 @@ Battler* GameState::AddBattler(int index, bool isEnemy)
 	{
 		return NULL;
 	}
-	cout << "Game: Add Battler of " << table[index].name << endl;
+	if (!isEnemy)
+	{
+		if (currentMoney < cost[index])
+		{
+			cout << "Game: Can't add battler, you don't have enough money! Current money: " << currentMoney << endl;
+			return NULL;
+		}
+		if (spawnCDing[index] > 0)
+		{
+			cout << "Game: Can't add battler, this type of battler is in cooldown: " << std::setprecision(5) << spawnCDing[index] << " second(s)." << endl;
+			return NULL;
+		}
+		currentMoney -= cost[index];
+		spawnCDing[index] = spawnCD[index];
+		cout << "Game: Add Battler of " << table[index].name << ", cost: "  << cost[index] << endl;
+	}
+	else
+	{
+		cout << "Game: Add enemy " << table[index].name << endl;
+	}
 	BattlerConfig config = table[index].config;
 	config.bof.pos = isEnemy ? leftSpawnPos : rightSpawnPos;
 	config.bof.dist = spawnDistance + (spawnDistanceRange * 2) * rand() / (RAND_MAX + 1.0) - spawnDistanceRange;
@@ -147,27 +190,27 @@ void GameState::Update(float deltaTime)
 	if (!constructed)
 		return;
 
-	// 每個 gameObject
+	// 每個 gameObject update
 	for (int i = GameObject::actors.size() - 1; i >= 0; i--)
 	{
 		GameObject::actors[i]->Update(deltaTime);
 	}
 
 	// 金錢增加
-	currentMoney += floorl(rateMoney_level[currentLevel] * deltaTime);
+	currentMoney += floorl(rateMoney_level[currentLevel] * deltaTime * 0.001f);
 	if (currentMoney > maxMoney_level[currentLevel])
 		currentMoney = maxMoney_level[currentLevel];
 
 	// CDing
 	for (int i = 0; i < CHARNUM; i++)
 	{
-		spawnCDing[i] -= deltaTime;
+		spawnCDing[i] -= deltaTime * 0.001f;
 		if (spawnCDing[i] < 0)
 		{
 			spawnCDing[i] = 0;
 		}
 	}
-	laserCDing -= deltaTime;
+	laserCDing -= deltaTime * 0.001f;
 	if (laserCDing < 0)
 	{
 		laserCDing = 0;
@@ -192,7 +235,18 @@ void GameState::Update(float deltaTime)
 		}
 	}
 
+	// enemy AI
 	EnemyAI(deltaTime);
+
+	// laser
+	if (laserTimer > 0)
+	{
+		laserTimer -= deltaTime * 0.001f;
+		if (laserTimer <= 0)
+		{
+			LaserAttack();
+		}
+	}
 }
 
 // 自動隨機出兵

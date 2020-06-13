@@ -15,18 +15,18 @@ struct CharacterConfig
 // 玩家使用的角色
 const vector<CharacterConfig> characterTable
 {
-	// name, speed, delay, kb, hp, att, attCD, range, sprite, x, y, z, size, enemy, diedelay
-	{"L_Tank", {10, 0.8f, 50, {250, 20, 1.0f, 1.5f, "L_Tank", 0, 0, 0, 2.5, true, 1.5f}}},
-	{"L_Ranger", {10, 2.0f, 50, {250, 30, 1.0f, 4.0f, "L_Ranger", 0, 0, 0, 3.0f, true, 1.5f}}}
+	// name, speed, delay, kb, loot, hp, att, attCD, range, sprite, x, y, z, size, enemy, diedelay
+	{"L_Tank", {10, 0.8f, 50, 50, {250, 20, 1.0f, 1.5f, "L_Tank", 0, 0, 0, 2.5, true, 1.5f}}},
+	{"L_Ranger", {10, 2.0f, 50, 70, {250, 30, 1.0f, 4.0f, "L_Ranger", 0, 0, 0, 3.0f, true, 1.5f}}}
 };
 
 // 左方AI使用的角色
 const vector<CharacterConfig> characterTable_enemy
 {
-	// name, speed, delay, kb, hp, att, attCD, range, sprite, x, y, z, size, enemy, diedelay
-	{"L_Tank", {10, 0.8f, 50, {250, 20, 1.0f, 1.5f, "L_Tank", 0, 0, 0, 2.5, true, 1.5f}}},
-	{"L_Ranger", {10, 2.0f, 50, {250, 30, 1.0f, 4.0f, "L_Ranger", 0, 0, 0, 3.0f, true, 1.5f}}},
-	{"L_Tank", {10, 0.8f, 50, {250, 20, 1.0f, 1.5f, "L_Tank", 0, 0, 0, 2.5, true, 1.5f}}}
+	// name, speed, delay, kb, loot, hp, att, attCD, range, sprite, x, y, z, size, enemy, diedelay
+	{"L_Tank", {10, 0.8f, 50, 50, {250, 20, 1.0f, 1.5f, "L_Tank", 0, 0, 0, 2.5, true, 1.5f}}},
+	{"L_Ranger", {10, 2.0f, 50, 70, {250, 30, 1.0f, 4.0f, "L_Ranger", 0, 0, 0, 3.0f, true, 1.5f}}},
+	{"L_Tank", {10, 0.8f, 50, 50, {250, 20, 1.0f, 1.5f, "L_Tank", 0, 0, 0, 2.5, true, 1.5f}}}
 };
 
 static class GameState
@@ -58,6 +58,7 @@ public:
 	bool GameOver;
 	bool enableEnemyAI;
 
+	void AddMoney(int amount);
 	// 開雷射砲
 	void Laser();
 	// 升級金錢
@@ -93,7 +94,7 @@ const float GameState::AICD_range = 2.5f;
 const int GameState::cost[CHARNUM] = {75, 150, 300, 600, 1000};
 const int GameState::maxMoney_level[LVLNUM] = {500, 1000, 1500, 2000, 2500};
 const int GameState::lvUP_cost[LVLNUM] = {250, 750, 1200, 1750, 3000};
-const int GameState::rateMoney_level[LVLNUM] = {50, 100, 150, 200, 250};
+const int GameState::rateMoney_level[LVLNUM] = {50, 60, 75, 90, 110};
 const float GameState::leftSpawnPos = -7;
 const float GameState::rightSpawnPos = 7;
 const float GameState::spawnDistance = -5;
@@ -105,6 +106,13 @@ const float GameState::laserSpeed = 10;
 const int GameState::enemySellectWeight[ENMYNUM] = {3, 1, 0};
 
 // .cpp
+
+void GameState::AddMoney(int amount)
+{
+	currentMoney += amount;
+	if (currentMoney > maxMoney_level[currentLevel])
+		currentMoney = maxMoney_level[currentLevel];
+}
 
 void GameState::Laser()
 {
@@ -123,7 +131,6 @@ void GameState::Laser()
 }
 void GameState::LaserAttack()
 {
-	cout << "lasering range: " << laseringRange << endl;
 	for (int i = BattleObject::allObjects.size() - 1; i >= 0; i--)
 	{
 		int cur_id = BattleObject::allObjects[i]->id_bo;
@@ -160,6 +167,14 @@ void GameState::LevelUp()
 			currentMoney -= lvUP_cost[currentLevel];
 			currentLevel++;
 		}
+		else
+		{
+			cout << "Game: Can't level up! You don't have enough money! Require: " << lvUP_cost[currentLevel] << endl;
+		}
+	}
+	else
+	{
+		cout << "Game: Can't level up! You're in max Lv." << currentLevel << endl;
 	}
 }
 
@@ -192,7 +207,7 @@ Battler* GameState::AddBattler(int index, bool isEnemy)
 		}
 		if (spawnCDing[index] > 0)
 		{
-			cout << "Game: Can't add battler, this type of battler is in cooldown: " << std::setprecision(5) << spawnCDing[index] << " second(s)." << endl;
+			cout << "Game: Can't add battler, this type of battler is in cooldown: " << std::setprecision(2) << spawnCDing[index] << " second(s)." << endl;
 			return NULL;
 		}
 		currentMoney -= cost[index];
@@ -222,9 +237,13 @@ void GameState::Update(float deltaTime)
 	}
 
 	// 金錢增加
-	currentMoney += floorl(rateMoney_level[currentLevel] * deltaTime * 0.001f);
-	if (currentMoney > maxMoney_level[currentLevel])
-		currentMoney = maxMoney_level[currentLevel];
+	if (Battler::allUnlootMoney > 0)
+	{
+		cout << "Game: Looted money: +" << Battler::allUnlootMoney << endl;
+		AddMoney(Battler::allUnlootMoney);
+		Battler::allUnlootMoney = 0;
+	}
+	AddMoney(floorl(rateMoney_level[currentLevel] * deltaTime * 0.001f));
 
 	// CDing
 	for (int i = 0; i < CHARNUM; i++)

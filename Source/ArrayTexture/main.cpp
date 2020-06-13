@@ -8,6 +8,7 @@
 #include "GameState.h"
 #include "ParticleSystem.h"
 #include "TranslateRoteteScaleHelper.h"
+#include "WindowShader.h"
 
 using namespace glm;
 using namespace std;
@@ -121,11 +122,6 @@ void InitParticle()
 {
 	ParticleSystem::InitShaderSystem(ShaderPath);
 	ParticleSystem::InitSpriteTable(ImagePath);
-
-	/*particleSystem = new ParticleSystem("Fire");
-	particleSystem->mPosition = vec3(2.5f, -1, 0);
-	particleSystem->SetAttributes(8, 100, 1, 1, 2.0f, 4, 1.0f);*/
-
 }
 
 void My_Init()
@@ -174,6 +170,9 @@ void My_Init()
 
 	//	init particle shader
 	InitParticle();
+
+	//	init window shader
+	WindowShader::InitShaderProgram(ShaderPath);
 
 	m_camera.ToggleOrtho();
 	m_camera.Zoom(64);
@@ -253,6 +252,8 @@ void ResetGameState()
 // GLUT callback. Called to draw the scene.
 void My_Display()
 {
+	WindowShader::BindFrameBuffer();
+
 	glClearColor(0.5f, 0.5f, 0.5f, 0.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -326,7 +327,8 @@ void My_Display()
 	}
 
 	
-
+	////////////////	Post FX				//////////////////////////////////////////////
+	WindowShader::Render();
 
 	glutSwapBuffers();
 }
@@ -338,6 +340,9 @@ void My_Reshape(int width, int height)
 	aspect = width * 1.0f / height;
 	m_camera.SetWindowSize(width, height);
 	glViewport(0, 0, width, height);
+
+	//	for frame shader
+	WindowShader::ChangeSize(width, height);
 }
 
 //Timer event (Update)

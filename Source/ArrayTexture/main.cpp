@@ -457,6 +457,12 @@ void My_Keyboard(unsigned char key, int x, int y)
 	case 'l':
 		myGameState->Laser();
 		break;
+	case 'm':
+		cout << "Game: money: " << (myGameState->currentMoney) << "/" << myGameState->maxMoney_level[myGameState->currentLevel] << endl;
+		break;
+	case 'u':
+		myGameState->LevelUp();
+		break;
 	default:
 		break;
 	}

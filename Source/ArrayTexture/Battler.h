@@ -1,5 +1,5 @@
 #pragma once
-#include "BattleObject.h"
+#include "GameState.h"
 
 const float runSpeedRatio = 0.1f;
 const float KBRange = 1.0f;
@@ -12,6 +12,7 @@ struct BattlerConfig
 	float speed;
 	float attackDelay;
 	float KBHP;
+	int lootMoney;
 	BOConfig bof;
 };
 
@@ -19,8 +20,10 @@ struct BattlerConfig
 class Battler : public BattleObject
 {
 public:
+	static int allUnlootMoney;
 	float speed;
 	float attackDelay;
+	int lootMoney;
 
 	Battler(BattlerConfig config);
 	~Battler();
@@ -35,9 +38,11 @@ protected:
 	BattlerState state;
 	void AI(float deltaTime);
 	BattleObject* FindTarget();
+	void Die() override;
 };
 
 ////////////////////	.cpp
+int Battler::allUnlootMoney = 0;
 
 Battler::Battler(BattlerConfig config): BattleObject(config.bof)
 {
@@ -49,6 +54,7 @@ Battler::Battler(BattlerConfig config): BattleObject(config.bof)
 	this->KBingRange = 0;
 	this->attackTimer = 0;
 	this->originalHeight = config.bof.height;
+	this->lootMoney = config.lootMoney;
 }
 Battler::~Battler()
 {
@@ -67,6 +73,8 @@ float Battler::Damage(float amount)
 	if (this->hp <= 0 && !isDying)
 	{
 		this->hp = 0;
+		allUnlootMoney += this->lootMoney;
+		this->Die();
 	}
 
 	// KB
@@ -155,7 +163,8 @@ void Battler::AI(float deltaTime)
 			{
 				// cout << "Battler " << this->id << ": state die" << endl;
 				this->state = BattlerState::die;
-				this->Die();
+				sprite->SetCurrentSet("die");
+				StartDestroy();
 			}
 			this->height = this->originalHeight;
 		}
@@ -226,4 +235,13 @@ BattleObject* Battler::FindTarget()
 		}
 	}
 	return target;
+}
+
+void Battler::Die()
+{
+	allObjects.erase(allObjects.begin() + this->id_bo);
+	for (int i = allObjects.size() - 1; i >= 0; i--)
+	{
+		allObjects[i]->id_bo = i;
+	}
 }

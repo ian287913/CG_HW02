@@ -13,6 +13,7 @@ using namespace glm;
 using namespace std;
 
 #define UPDATE_CYCLE 33		//	(mini second)
+#define UINUM 5				//	UIªº­Ó¼Æ
 
 //uniform id
 struct
@@ -52,6 +53,22 @@ float debug_y = 0.0f;
 
 //  will
 GameState* myGameState;
+float camara_shape[2] = { 0, 0 };
+void CharacterButton(float x, float y);
+Sprite2D* UI_Button_chara_back;
+Sprite2D* UI_Button_chara_frame;
+Animation* UI_Button_chara[CHARNUM];
+const string character_names[CHARNUM] = {"L_Tank", "L_Ranger", "L_Tank", "L_Tank", "L_Tank"};
+const float character_scale[CHARNUM] = {1.8f, 2.16f, 1.8f, 1.8f, 1.8f};
+const float UI_Button_chara_size = 0.3f;
+const float UI_trans[UINUM][4] = 
+{ 
+	{-3.6f,	-3.8f,		1.8f},
+	{-1.8f, -3.8f,		1.8f},
+	{0,		0.0f,		1.8f},
+	{1.8f,	-3.8f,		1.8f},
+	{3.6f,	-3.8f,		1.8f}
+};
 //
 
 
@@ -109,6 +126,17 @@ void My_LoadTextures()
 	BackgroundSprite = new Sprite2D();
 	BackgroundSprite->Init(ImagePath + "Background/BG.png", 1, 1, 24, false, 0, 0);
 
+	// UI
+	UI_Button_chara_back = new Sprite2D();
+	UI_Button_chara_back->Init(ImagePath + "characterButtonBack.png", 1, 1, 24, false, 0, 0);
+	UI_Button_chara_frame = new Sprite2D();
+	UI_Button_chara_frame->Init(ImagePath + "card_background.png", 1, 1, 24, false, 0, 0);
+	for (int i = 0; i < CHARNUM; i++)
+	{
+		Animation* anim = new Animation(character_names[i]);
+		UI_Button_chara[i] = anim;
+	}
+	
 	//	Debug axis
 	DebugSprite = new Sprite2D();
 	DebugSprite->Init(ImagePath + "axis.png", 1, 1, 24, false, 0, 0);
@@ -317,6 +345,16 @@ void My_Display()
 
 	////////////////	Draw UI				//////////////////////////////////////////////
 
+	for (int i = 0; i < UINUM; i++)
+	{
+		DrawSprite(UI_Button_chara_back, translate(0, 0, 0), vec3(UI_trans[i][0], UI_trans[i][1], 0), vec3(UI_trans[i][2], UI_trans[i][2], 1));
+		DrawSprite(UI_Button_chara_frame, translate(0, 0, 0), vec3(UI_trans[i][0], UI_trans[i][1], 0), vec3(UI_trans[i][2], UI_trans[i][2], 1));
+	}
+	for (int i = 0; i < CHARNUM; i++)
+	{
+		DrawAnimation(UI_Button_chara[i], translate(UI_trans[i][0], UI_trans[i][1] - UI_Button_chara_size, 0) * scale(character_scale[i], character_scale[i], 1) * UI_Button_chara[i]->anchorTranslate);
+	}
+
 	//	Debug axis
 	DrawSprite(DebugSprite, translate(0, 0, 0), vec3(0, 0, 0), vec3(debug_y, debug_y, 1));
 
@@ -328,6 +366,8 @@ void My_Display()
 //Call to resize the window
 void My_Reshape(int width, int height)
 {
+	camara_shape[0] = width;
+	camara_shape[1] = height;
 	aspect = width * 1.0f / height;
 	m_camera.SetWindowSize(width, height);
 	glViewport(0, 0, width, height);
@@ -342,10 +382,15 @@ void My_Timer(int val)
 		//	ParticleSystem
 		ParticleSystem::UpdateInstances(((float)UPDATE_CYCLE) * updateSpeed);
 	}
-
+	// gameobjects
 	if (myGameState != NULL)
 	{
 		myGameState->Update(((float)UPDATE_CYCLE) * updateSpeed);
+	}
+	// UIs
+	for (int i = 0; i < CHARNUM; i++)
+	{
+		UI_Button_chara[i]->Elapse(((float)UPDATE_CYCLE) * updateSpeed);
 	}
 
 	glutPostRedisplay();
@@ -357,18 +402,19 @@ void My_Mouse(int button, int state, int x, int y)
 {
 	m_camera.mouseEvents(button, state, x, y);
 
-	/*if (button == GLUT_LEFT_BUTTON)
+	if (button == GLUT_LEFT_BUTTON)
 	{
 		if (state == GLUT_DOWN)
 		{
-			printf("Mouse %d is pressed at (%d, %d)\n", button, x, y);
-		}
-		else if (state == GLUT_UP)
-		{
+			CharacterButton(x, y);
 			printf("Mouse %d is released at (%d, %d)\n", button, x, y);
 		}
+		/*else if (state == GLUT_UP)
+		{
+			printf("Mouse %d is released at (%d, %d)\n", button, x, y);
+		}*/
 	}
-	else if (button == GLUT_RIGHT_BUTTON)
+	/*else if (button == GLUT_RIGHT_BUTTON)
 	{
 		printf("Mouse %d is pressed\n", button);
 	}
@@ -470,6 +516,28 @@ void My_Keyboard(unsigned char key, int x, int y)
 
 void My_Mouse_Moving(int x, int y) {
 	m_camera.mouseMoveEvent(x, y);
+}
+
+void CharacterButton(float x, float y)
+{
+	cout << "camShape: " << camara_shape[0] << ", " << camara_shape[1] << endl;
+	for (int i = 0; i < CHARNUM; i++)
+	{
+		mat4 modelToCam = m_camera.GetProjectionMatrix(aspect) * m_camera.GetViewMatrix() * m_camera.GetModelMatrix()
+			* translate(0, 0, 0);
+		vec4 camPos = modelToCam * vec4(UI_trans[i][0], UI_trans[i][1], 0, 1);
+		float UI_pos[2] = 
+		{
+			(camPos.x/2 + 0.5f) * camara_shape[0],
+			(-camPos.y + 1.0f) * camara_shape[1] / 2
+		};
+		// cout << "camPos: " << UI_pos[0] << ", " << UI_pos[1] << endl;
+		if (sqrtf(pow(x - UI_pos[0], 2) + pow(y - UI_pos[1], 2)) < UI_Button_chara_size * 200.0f)
+		{
+			cout << "press character button " << i << endl;
+			break;
+		}
+	}
 }
 
 int main(int argc, char *argv[])

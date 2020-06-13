@@ -10,6 +10,17 @@
 #include "SpriteObject.h"
 
 
+struct ParticleUniforms
+{
+	GLint  mv_matrix;
+	GLint  proj_matrix;
+	GLint  time;
+	GLint  speed;
+	GLint  fadeRadius;
+	GLint  fadeDistance;
+	GLint  fading;
+};
+
 class ParticleSystem
 {
 	struct ParticleSprite
@@ -46,16 +57,21 @@ private:
 	static GLuint program;
 	static GLuint vao;
 	static GLuint vbo;
-	static GLint  mv_matrix;
-	static GLint  proj_matrix;
-	static GLint  uniform_time;
-	static GLint  uniform_speed;
-	static GLint  uniform_fadeRadius;
-	static GLint  uniform_fadeDistance;
+	//	shader parameters - Uniform
+	static ParticleUniforms uniforms;
+	//	shader parameters - Layout
+	struct
+	{
+		glm::vec2 pos[100];
+		glm::vec2 direction[100];
+		float scale[100];
+		float rotation[100];
+		int frame[100];
+	} layouts;
 
+	//	time
 	float particleTime = 0;
-	glm::vec2 pos[100];
-	int frame[100];
+
 	//	system attributes
 	Sprite2D* sprite;
 	float lifeTime = 5000;
@@ -75,16 +91,11 @@ std::vector<ParticleSystem::ParticleSprite> ParticleSystem::ParticleSpriteTable
 GLuint ParticleSystem::program;
 GLuint ParticleSystem::vao;
 GLuint ParticleSystem::vbo;
-GLint  ParticleSystem::mv_matrix;
-GLint  ParticleSystem::proj_matrix;
-GLint  ParticleSystem::uniform_time;
-GLint  ParticleSystem::uniform_speed;
-GLint  ParticleSystem::uniform_fadeRadius;
-GLint  ParticleSystem::uniform_fadeDistance;
+ParticleUniforms ParticleSystem::uniforms;
 
 void ParticleSystem::InitShaderSystem(std::string shaderPath)
 {
-	//////////	Init Instance vector
+	//////////	Clear Instance vector
 	particleInstances.clear();
 
 	//////////	Init program
@@ -109,28 +120,30 @@ void ParticleSystem::InitShaderSystem(std::string shaderPath)
 	glLinkProgram(program);
 
 	//Cache uniform variable id
-	proj_matrix = glGetUniformLocation(program, "um4p");
-	mv_matrix = glGetUniformLocation(program, "um4mv");
-	uniform_time = glGetUniformLocation(program, "time");
-	uniform_speed = glGetUniformLocation(program, "speed");
-	uniform_fadeRadius = glGetUniformLocation(program, "fadeRadius");
-	uniform_fadeDistance = glGetUniformLocation(program, "fadeDistance");
+	uniforms.proj_matrix = glGetUniformLocation(program, "um4p");
+	uniforms.mv_matrix = glGetUniformLocation(program, "um4mv");
+	uniforms.time = glGetUniformLocation(program, "time");
+	uniforms.speed = glGetUniformLocation(program, "speed");
+	uniforms.fadeRadius = glGetUniformLocation(program, "fadeRadius");
+	uniforms.fadeDistance = glGetUniformLocation(program, "fadeDistance");
 
-	
 	glUseProgram(program);
 
 	//////////	Init buffers
 	glGenVertexArrays(1, &vao);
 	glBindVertexArray(vao);
 
-	//	pos and frame attributes (layout)
+	//	buffer attributes (layout)
 	glm::vec2 pos[100];
 	int frame[100];
+	float scale[100];
+	float rotation[100];
+	glm::vec2 direction[100];
 
 	glGenBuffers(1, &vbo);
 
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(pos) + sizeof(frame), NULL, GL_DYNAMIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(pos) + sizeof(frame) + sizeof(scale) + sizeof(rotation), NULL, GL_DYNAMIC_DRAW);
 
 	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(pos), pos);
 	glEnableVertexAttribArray(0);
@@ -141,6 +154,21 @@ void ParticleSystem::InitShaderSystem(std::string shaderPath)
 	glEnableVertexAttribArray(1);
 	glVertexAttribIPointer(1, 1, GL_INT, 0, (GLvoid*)(sizeof(pos)));
 	glVertexAttribDivisor(1, 1);
+
+	glBufferSubData(GL_ARRAY_BUFFER, sizeof(pos) + sizeof(frame), sizeof(scale), scale);
+	glEnableVertexAttribArray(2);
+	glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, 0, (GLvoid*)(sizeof(pos) + sizeof(frame)));
+	glVertexAttribDivisor(2, 1);
+
+	glBufferSubData(GL_ARRAY_BUFFER, sizeof(pos) + sizeof(frame) + sizeof(scale), sizeof(rotation), rotation);
+	glEnableVertexAttribArray(3);
+	glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, 0, (GLvoid*)(sizeof(pos) + sizeof(frame) + sizeof(scale)));
+	glVertexAttribDivisor(3, 1);
+
+	glBufferSubData(GL_ARRAY_BUFFER, sizeof(pos) + sizeof(frame) + sizeof(scale) + sizeof(rotation), sizeof(direction), direction);
+	glEnableVertexAttribArray(4);
+	glVertexAttribPointer(4, 2, GL_FLOAT, GL_FALSE, 0, (GLvoid*)(sizeof(pos) + sizeof(frame) + sizeof(scale) + sizeof(rotation)));
+	glVertexAttribDivisor(4, 1);
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
@@ -219,7 +247,11 @@ void ParticleSystem::SetAttributes(float _lifeTime, int _amount, float _spawnRad
 	//	init offsets
 	for (int i = 0; i < amount; i++)
 	{
-		pos[i] = RandomPointRadius(spawnRadius_Min, spawnRadius_Max);
+		layouts.pos[i] = RandomPointRadius(spawnRadius_Min, spawnRadius_Max);
+		layouts.scale[i] = RandomFloat(0.5f, 0.5f);
+		layouts.rotation[i] = RandomFloat(0.0f, 3.14159f * 2.0f);
+		layouts.direction[i] = vec2(1, 1);
+
 	}
 
 	if (amount > 100)
@@ -256,8 +288,31 @@ void ParticleSystem::Render(ViewManager m_camera, float aspect)
 	}*/
 
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(pos), pos);
-	glBufferSubData(GL_ARRAY_BUFFER, sizeof(pos), sizeof(GL_INT) * amount, frame);
+
+	glBufferSubData(GL_ARRAY_BUFFER, 0, 
+					sizeof(layouts.pos),				layouts.pos);
+
+	glBufferSubData(GL_ARRAY_BUFFER, sizeof(layouts.pos),
+					sizeof(layouts.frame),				layouts.frame);
+					///sizeof(GL_INT) * amount,			layouts.frame);
+
+	glBufferSubData(GL_ARRAY_BUFFER, sizeof(layouts.pos) + sizeof(layouts.frame),
+					sizeof(layouts.scale),				layouts.scale);
+					///sizeof(GL_FLOAT) * amount,			layouts.scale);
+
+	glBufferSubData(GL_ARRAY_BUFFER, sizeof(layouts.pos) + sizeof(layouts.frame) + sizeof(layouts.scale),
+					sizeof(layouts.rotation),			layouts.rotation);
+					///sizeof(GL_FLOAT) * amount,			layouts.rotation);
+
+	glBufferSubData(GL_ARRAY_BUFFER, sizeof(layouts.pos) + sizeof(layouts.frame) + sizeof(layouts.scale) + sizeof(layouts.rotation),
+					sizeof(layouts.direction),			layouts.direction);
+					///sizeof(GL_FLOAT) * amount * 2,			layouts.direction);
+	for (int i = 0; i < amount; i++)
+	{
+		///cout << layouts.direction[i].x << "\n";
+	}
+
+
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 	//Update shaders' input variable
@@ -267,12 +322,12 @@ void ParticleSystem::Render(ViewManager m_camera, float aspect)
 	glBindVertexArray(vao);
 
 	sprite->Enable();
-	glUniformMatrix4fv(mv_matrix, 1, GL_FALSE, value_ptr(m_camera.GetViewMatrix() * m_camera.GetModelMatrix() * scale(mScale) * translate(mPosition)));
-	glUniformMatrix4fv(proj_matrix, 1, GL_FALSE, value_ptr(m_camera.GetProjectionMatrix(aspect)));
-	glUniform1f(uniform_time, particleTime * 0.001f);
-	glUniform1f(uniform_speed, speed);
-	glUniform1f(uniform_fadeRadius, fadeRadius);
-	glUniform1f(uniform_fadeDistance, fadeDistance);
+	glUniformMatrix4fv(uniforms.mv_matrix, 1, GL_FALSE, value_ptr(m_camera.GetViewMatrix() * m_camera.GetModelMatrix() * scale(mScale) * translate(mPosition)));
+	glUniformMatrix4fv(uniforms.proj_matrix, 1, GL_FALSE, value_ptr(m_camera.GetProjectionMatrix(aspect)));
+	glUniform1f(uniforms.time, particleTime * 0.001f);
+	glUniform1f(uniforms.speed, speed);
+	glUniform1f(uniforms.fadeRadius, fadeRadius);
+	glUniform1f(uniforms.fadeDistance, fadeDistance);
 	glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, amount);
 	sprite->Disable();
 

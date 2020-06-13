@@ -46,16 +46,12 @@ public:
 		fadeRadius, fadeDistance = 1.0
 
 		rotation:	min, max = 0, 6.28
-		scale = 1
+		scale:		min, max
 		lifetime = 3
 		timeSpeed = 1
-
-
 	*/
-	static void CreateInstance(int _amount, std::string spriteName);
-
-	static void CreateInstance(int _amount, std::string spriteName, float _lifeTime, float _spawnRadius_Max, float _spawnRadius_Min,
-		float _speed, float _fadeRadius, float _fadeDistance);
+	static void CreateInstance(int _amount, std::string _spriteName, glm::vec2 _directionLH, glm::vec2 _speedLH, glm::vec2 _spawnRadiusLH,
+		float _fadeRadius, float _fadeDistance, glm::vec2 _rotationLH, glm::vec2 _scaleLH, float _lifetime, float _timeSpeed);
 	static void CreateInstance(std::string spriteName, float _lifeTime, int _amount, float _spawnRadius_Max, float _spawnRadius_Min,
 		float _speed, float _fadeRadius, float _fadeDistance);
 
@@ -222,6 +218,43 @@ void ParticleSystem::UpdateInstances(float deltaTime)
 		}
 	}
 }
+
+void ParticleSystem::CreateInstance(int _amount, std::string _spriteName, 
+	glm::vec2 _directionLH, glm::vec2 _speedLH, glm::vec2 _spawnRadiusLH,
+	float _fadeRadius, float _fadeDistance, 
+	glm::vec2 _rotationLH, glm::vec2 _scaleLH, float _lifetime, float _timeSpeed)
+{
+	cout << "hollo\n";
+
+	ParticleSystem newParticle(_spriteName);
+
+	newParticle.amount = _amount <= 100 ? _amount : 100;
+
+	newParticle.lifeTime = _lifetime * 1000;
+	newParticle.spawnRadius_Min = _spawnRadiusLH.x;
+	newParticle.spawnRadius_Max = _spawnRadiusLH.y;
+	newParticle.speed = _timeSpeed;
+	newParticle.fadeRadius = _fadeRadius;
+	newParticle.fadeDistance = _fadeDistance;
+
+	for (int i = 0; i < newParticle.amount; i++)
+	{
+		newParticle.layouts.pos[i] = RandomPointRadius(_spawnRadiusLH.x, _spawnRadiusLH.y);
+		newParticle.layouts.scale[i] = RandomFloat(_scaleLH.x, _scaleLH.y);
+		newParticle.layouts.rotation[i] = RandomFloat(_rotationLH.x, _rotationLH.y);
+		if (_speedLH.x < 0 && _speedLH.y < 0 && LengthOfVec2(newParticle.layouts.pos[i]) != 0)	//	sdirection = origin point ->pos
+		{
+			newParticle.layouts.direction[i] = NormalizedVec2(newParticle.layouts.pos[i]) * RandomFloat(-_speedLH.x, -_speedLH.y);
+		}
+		else
+		{
+			newParticle.layouts.direction[i] = RandomDirection(_directionLH.x, _directionLH.y) * RandomFloat(_speedLH.x, _speedLH.y);
+		}
+	}
+
+	particleInstances.push_back(newParticle);
+
+}
 void ParticleSystem::CreateInstance(std::string spriteName, 
 									float _lifeTime, int _amount, float _spawnRadius_Max, float _spawnRadius_Min,
 									float _speed, float _fadeRadius, float _fadeDistance)
@@ -274,9 +307,6 @@ void ParticleSystem::SetAttributes(float _lifeTime, int _amount, float _spawnRad
 		layouts.direction[i] = vec2(0.1f, 0.1f);
 
 	}
-
-	if (amount > 100)
-		amount = 100;
 }
 
 void ParticleSystem::Elapse(float deltaTime)
@@ -328,6 +358,7 @@ void ParticleSystem::Render(ViewManager m_camera, float aspect)
 	glBufferSubData(GL_ARRAY_BUFFER, sizeof(layouts.pos) + sizeof(layouts.frame) + sizeof(layouts.scale) + sizeof(layouts.rotation),
 					sizeof(layouts.direction),			layouts.direction);
 					///sizeof(GL_FLOAT) * amount * 2,			layouts.direction);
+	cout << "hi\n";
 	for (int i = 0; i < amount; i++)
 	{
 		///cout << layouts.direction[i].x << "\n";

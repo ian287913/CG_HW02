@@ -47,7 +47,7 @@ glm::vec2 RandomPosition(float xRange, float yRange)
 	return pos;
 }
 
-float LengthOfVec2(glm::vec2 &_vec2)
+float LengthOfVec2(const glm::vec2 &_vec2)
 {
 	return sqrtf(_vec2.x * _vec2.x + _vec2.y * _vec2.y);
 }
@@ -57,13 +57,28 @@ void NormalizeVec2(glm::vec2 &_vec2)
 	if (LengthOfVec2(_vec2) != 0)
 		_vec2 /= LengthOfVec2(_vec2);
 }
+glm::vec2 NormalizedVec2(const glm::vec2 &_vec2)
+{
+	if (LengthOfVec2(_vec2) != 0)
+		return _vec2 / LengthOfVec2(_vec2);
 
+	return glm::vec2(0, 0);
+}
+
+//	length = 1
+glm::vec2 RandomDirection(float minRadius, float maxRadius)
+{
+	float radius = RandomFloat(minRadius, maxRadius);
+	return vec2(cos(radius), sin(radius));
+}
+
+//	random donuts
 glm::vec2 RandomPointRadius(float minRadius, float maxRadius)
 {
-	vec2 direction = vec2(RandomFloat(-1.0f, 1.0f), RandomFloat(-1.0f, 1.0f));
-	NormalizeVec2(direction);
-	return direction * RandomFloat(minRadius, maxRadius);
+	return RandomDirection(0, 3.14159f * 2.0f) * RandomFloat(minRadius, maxRadius);
 }
+
+
 
 
 

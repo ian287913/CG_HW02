@@ -48,6 +48,7 @@ Sprite2D* DebugSprite;
 float imageScale = 1.0f;
 float debug_x = 0.0f;
 float debug_y = 0.0f;
+bool DEBUG_MODE = false;
 //
 
 //  will
@@ -317,8 +318,14 @@ void My_Display()
 
 	////////////////	Draw UI				//////////////////////////////////////////////
 
-	//	Debug axis
-	DrawSprite(DebugSprite, translate(0, 0, 0), vec3(0, 0, 0), vec3(debug_y, debug_y, 1));
+	if (DEBUG_MODE)
+	{
+		//	Debug axis
+		DrawSprite(DebugSprite, translate(0, 0, 0), vec3(0, 0, 0), vec3(4, 4, 1));
+		DrawSprite(DebugSprite, translate(1, 1, 0), vec3(0, 0, 0), vec3(4, 4, 1));
+	}
+
+	
 
 
 	glutSwapBuffers();
@@ -384,11 +391,20 @@ void My_Keyboard(unsigned char key, int x, int y)
 	switch (key)
 	{
 	case 'w':
-		ParticleSystem::CreateInstance("Fire", 8000, 10, 1.0f, 0.0f, 16.0f, 20.0f, 20.0f);
+		ParticleSystem::CreateInstance(50, "Hit", vec2(0, 6.28f), vec2(-0.001f, -1.5f),
+			vec2(0.0f, 0.5f), 1.8f, 0.5f,
+			vec2(0, 6.28f), vec2(0.3f, 0.4f), 0.3, 1.0f);
+		/*	parameters:
+									  ( _amount, _spriteName, _directionLH, _speedLH,
+			_spawnRadiusLH,	_fadeRadius, _fadeDistance,
+			_rotationLH, _scaleLH, _lifetime, _timeSpeed)
+		*/
+
 		debug_y += 0.2f;
 		cout << "debug_y = " << debug_y << "\n";
 		break;
 	case 's':
+		
 		debug_y -= 0.2f;
 		cout << "debug_y = " << debug_y << "\n";
 		break;
@@ -462,6 +478,10 @@ void My_Keyboard(unsigned char key, int x, int y)
 		break;
 	case 'u':
 		myGameState->LevelUp();
+		break;
+	case '=':
+		DEBUG_MODE = !DEBUG_MODE;
+		cout << "DEBUG_MODE = " << DEBUG_MODE << "\n";
 		break;
 	default:
 		break;

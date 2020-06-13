@@ -61,6 +61,12 @@
     </None>
     <None Include="..\..\Assets\Shader\ArrayTexture\particle.fs.glsl" />
     <None Include="..\..\Assets\Shader\ArrayTexture\particle.vs.glsl" />
+    <None Include="..\..\Assets\Shader\ArrayTexture\window.fs.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\..\Assets\Shader\ArrayTexture\window.vs.glsl">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Source\ArrayTexture\Sprite2D.h">
@@ -91,6 +97,9 @@
       <Filter>標頭檔</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\ArrayTexture\GameState.h">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\ArrayTexture\WindowShader.h">
       <Filter>標頭檔</Filter>
     </ClInclude>
   </ItemGroup>

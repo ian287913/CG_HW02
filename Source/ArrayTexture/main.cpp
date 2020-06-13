@@ -8,12 +8,13 @@
 #include "GameState.h"
 #include "ParticleSystem.h"
 #include "TranslateRoteteScaleHelper.h"
+#include "WindowShader.h"
 
 using namespace glm;
 using namespace std;
 
 #define UPDATE_CYCLE 33		//	(mini second)
-#define UINUM 5				//	UIªº­Ó¼Æ
+#define UINUM 5				//	UIï¿½ï¿½ï¿½Ó¼ï¿½
 
 //uniform id
 struct
@@ -49,6 +50,7 @@ Sprite2D* DebugSprite;
 float imageScale = 1.0f;
 float debug_x = 0.0f;
 float debug_y = 0.0f;
+bool DEBUG_MODE = false;
 //
 
 //  will
@@ -65,7 +67,7 @@ const float UI_trans[UINUM][4] =
 { 
 	{-3.6f,	-3.8f,		1.8f},
 	{-1.8f, -3.8f,		1.8f},
-	{0,		0.0f,		1.8f},
+	{0,		-3.8f,		1.8f},
 	{1.8f,	-3.8f,		1.8f},
 	{3.6f,	-3.8f,		1.8f}
 };
@@ -148,11 +150,6 @@ void InitParticle()
 {
 	ParticleSystem::InitShaderSystem(ShaderPath);
 	ParticleSystem::InitSpriteTable(ImagePath);
-
-	/*particleSystem = new ParticleSystem("Fire");
-	particleSystem->mPosition = vec3(2.5f, -1, 0);
-	particleSystem->SetAttributes(8, 100, 1, 1, 2.0f, 4, 1.0f);*/
-
 }
 
 void My_Init()
@@ -202,6 +199,9 @@ void My_Init()
 	//	init particle shader
 	InitParticle();
 
+	//	init window shader
+	WindowShader::InitShaderProgram(ShaderPath);
+
 	m_camera.ToggleOrtho();
 	m_camera.Zoom(64);
 
@@ -229,7 +229,7 @@ void DrawAnimation(Animation* anim, glm::mat4 _matrix, float fading = 0.0f)
 
 	anim->Enable();
 	glUniformMatrix4fv(uniforms.mv_matrix, 1, GL_FALSE, value_ptr(m_camera.GetViewMatrix() * m_camera.GetModelMatrix() * _matrix * anim->spriteSheet->GetModelMat()));
-	///	anchor½Õ¾ã¥Î:
+	///	anchorï¿½Õ¾ï¿½ï¿½:
 	///glUniformMatrix4fv(uniforms.mv_matrix, 1, GL_FALSE, value_ptr(m_camera.GetViewMatrix() * m_camera.GetModelMatrix() * _matrix * translate(0, debug_x, 0) * anim->spriteSheet->GetModelMat()));
 	glUniformMatrix4fv(uniforms.proj_matrix, 1, GL_FALSE, value_ptr(m_camera.GetProjectionMatrix(aspect)));
 	glUniform1f(uniforms.fading, fading);
@@ -280,6 +280,8 @@ void ResetGameState()
 // GLUT callback. Called to draw the scene.
 void My_Display()
 {
+	WindowShader::BindFrameBuffer();
+
 	glClearColor(0.5f, 0.5f, 0.5f, 0.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -355,9 +357,16 @@ void My_Display()
 		DrawAnimation(UI_Button_chara[i], translate(UI_trans[i][0], UI_trans[i][1] - UI_Button_chara_size, 0) * scale(character_scale[i], character_scale[i], 1) * UI_Button_chara[i]->anchorTranslate);
 	}
 
-	//	Debug axis
-	DrawSprite(DebugSprite, translate(0, 0, 0), vec3(0, 0, 0), vec3(debug_y, debug_y, 1));
+	if (DEBUG_MODE)
+	{
+		//	Debug axis
+		DrawSprite(DebugSprite, translate(0, 0, 0), vec3(0, 0, 0), vec3(4, 4, 1));
+		DrawSprite(DebugSprite, translate(1, 1, 0), vec3(0, 0, 0), vec3(4, 4, 1));
+	}
 
+	
+	////////////////	Post FX				//////////////////////////////////////////////
+	WindowShader::Render();
 
 	glutSwapBuffers();
 }
@@ -371,6 +380,9 @@ void My_Reshape(int width, int height)
 	aspect = width * 1.0f / height;
 	m_camera.SetWindowSize(width, height);
 	glViewport(0, 0, width, height);
+
+	//	for frame shader
+	WindowShader::ChangeSize(width, height);
 }
 
 //Timer event (Update)
@@ -430,11 +442,20 @@ void My_Keyboard(unsigned char key, int x, int y)
 	switch (key)
 	{
 	case 'w':
-		ParticleSystem::CreateInstance("Fire", 8000, 10, 1.0f, 0.0f, 16.0f, 20.0f, 20.0f);
+		ParticleSystem::CreateInstance(50, "Hit", vec2(0, 6.28f), vec2(-0.001f, -1.5f),
+			vec2(0.0f, 0.5f), 1.8f, 0.5f,
+			vec2(0, 6.28f), vec2(0.3f, 0.4f), 0.3, 1.0f);
+		/*	parameters:
+									  ( _amount, _spriteName, _directionLH, _speedLH,
+			_spawnRadiusLH,	_fadeRadius, _fadeDistance,
+			_rotationLH, _scaleLH, _lifetime, _timeSpeed)
+		*/
+
 		debug_y += 0.2f;
 		cout << "debug_y = " << debug_y << "\n";
 		break;
 	case 's':
+		
 		debug_y -= 0.2f;
 		cout << "debug_y = " << debug_y << "\n";
 		break;
@@ -508,6 +529,10 @@ void My_Keyboard(unsigned char key, int x, int y)
 		break;
 	case 'u':
 		myGameState->LevelUp();
+		break;
+	case '=':
+		DEBUG_MODE = !DEBUG_MODE;
+		cout << "DEBUG_MODE = " << DEBUG_MODE << "\n";
 		break;
 	default:
 		break;

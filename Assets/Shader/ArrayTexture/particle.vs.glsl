@@ -2,6 +2,9 @@
 
 layout(location = 0) in vec2 offset;
 layout(location = 1) in int spriteIndex;
+layout(location = 2) in float scaling;
+layout(location = 3) in float rotation;
+layout(location = 4) in vec2 direction;
 
 uniform mat4 um4mv;
 uniform mat4 um4p;
@@ -21,11 +24,16 @@ out float fadeCoef;
 const vec2[] points = vec2[4](vec2(-0.5, -0.5), vec2(0.5, -0.5), vec2(-0.5, 0.5), vec2(0.5, 0.5));
 const vec2[] uv = vec2[4](vec2(0, 0), vec2(1, 0), vec2(0, 1), vec2(1, 1));
 
+vec2 RotateV2(vec2 v2, float radius)
+{
+	return vec2(v2.x * cos(radius) - v2.y * sin(radius), v2.x * sin(radius) + v2.y * cos(radius));
+}
+
 void main()
 {
-	vec2 distance = offset * (1.0f + time * speed);
+	vec2 distance = offset + (direction * time * speed);
 
-	gl_Position = um4p * um4mv * vec4(points[gl_VertexID] + distance, 0.0, 1.0);
+	gl_Position = um4p * um4mv * vec4((RotateV2(points[gl_VertexID], rotation) * scaling) + distance, 0.0, 1.0);
 	vertexData.texcoord = uv[gl_VertexID];
 	vertexData.spriteIndex = spriteIndex;
 
@@ -42,6 +50,4 @@ void main()
 		fadeCoef = 1;
 	else if (fadeCoef < 0)
 		fadeCoef = 0;
-
-	//fadeCoef = 1;
 }

@@ -47,6 +47,8 @@ public:
 	static const float spawnDistanceRange;
 	static const float towerHP;
 	static const float towerAttack;
+	static const float laserRange;
+	static const float laserSpeed;
 	static const int enemySellectWeight[ENMYNUM];
 	
 	int currentMoney;
@@ -72,6 +74,8 @@ protected:
 	float laserCDing;
 	float AICDing;
 	float laserTimer;
+	vector<BattleObject*> laseredObjects;
+	float laseringRange;
 	int allWeights;
 	bool constructed = false;
 	// update呼叫的敵方AI
@@ -95,7 +99,9 @@ const float GameState::rightSpawnPos = 7;
 const float GameState::spawnDistance = -5;
 const float GameState::spawnDistanceRange = 0.6f;
 const float GameState::towerHP = 1000;
-const float GameState::towerAttack = 10000;
+const float GameState::towerAttack = 1000;
+const float GameState::laserRange = 15;
+const float GameState::laserSpeed = 10;
 const int GameState::enemySellectWeight[ENMYNUM] = {3, 1, 0};
 
 // .cpp
@@ -111,16 +117,35 @@ void GameState::Laser()
 	// 特效
 	// n秒後攻擊
 	laserTimer = laserDelay;
+	laseredObjects.clear();
 	// 進cd
 	laserCDing = laserCD;
 }
 void GameState::LaserAttack()
 {
+	cout << "lasering range: " << laseringRange << endl;
 	for (int i = BattleObject::allObjects.size() - 1; i >= 0; i--)
 	{
-		if (BattleObject::allObjects[i]->facing > 0 && (BattleObject::allObjects[i]->id_bo != leftTower->id_bo))
+		int cur_id = BattleObject::allObjects[i]->id_bo;
+		if (BattleObject::allObjects[i]->facing > 0 && (cur_id != leftTower->id_bo))
 		{
-			BattleObject::allObjects[i]->Damage(towerAttack);
+			if (BattleObject::allObjects[i]->position < rightSpawnPos - laseringRange)
+				continue;
+
+			bool inLasered = false;
+			for (int j = 0; j < laseredObjects.size(); j++)
+			{
+				if (laseredObjects[j]->id_bo == cur_id)
+				{
+					inLasered = true;
+					break;
+				}
+			}
+			if (!inLasered)
+			{
+				BattleObject::allObjects[i]->Damage(towerAttack);
+				laseredObjects.push_back(BattleObject::allObjects[i]);
+			}
 		}
 	}
 }
@@ -244,8 +269,13 @@ void GameState::Update(float deltaTime)
 		laserTimer -= deltaTime * 0.001f;
 		if (laserTimer <= 0)
 		{
-			LaserAttack();
+			laseringRange = 0;
 		}
+	}
+	if (laseringRange < laserRange)
+	{
+		laseringRange += laserSpeed * deltaTime * 0.001f;
+		LaserAttack();
 	}
 }
 
@@ -301,6 +331,9 @@ GameState::GameState()
 		spawnCDing[i] = 0;
 	}
 	laserCDing = 0;
+	laserTimer = -1;
+	laseringRange = laserRange;
+	laseredObjects = vector<BattleObject*>();
 	AICDing = AICD;
 	allWeights = 0;
 	for (int i = 0; i < ENMYNUM; i++)

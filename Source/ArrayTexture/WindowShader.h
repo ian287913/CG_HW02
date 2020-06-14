@@ -24,6 +24,15 @@ public:
 	static GLuint FBO;
 	static GLuint depthRBO;
 	static const GLfloat window_positions[];
+
+	//	uniforms
+	static struct Uniforms
+	{
+		GLint  grayScale;
+		GLint  colorOffset;
+	} uniforms;
+	static float grayScale;
+	static glm::vec4 colorOffset;
 };
 const GLfloat WindowShader::window_positions[] =
 {
@@ -32,6 +41,11 @@ const GLfloat WindowShader::window_positions[] =
 	-1.0f,1.0f,0.0f,1.0f,
 	1.0f,1.0f,1.0f,1.0f
 };
+
+//	uniforms
+struct WindowShader::Uniforms WindowShader::uniforms;
+float WindowShader::grayScale = 0;
+glm::vec4 WindowShader::colorOffset = glm::vec4(0, 0, 0, 0);
 
 GLuint WindowShader::program;
 GLuint WindowShader::vao;
@@ -64,6 +78,9 @@ void WindowShader::InitShaderProgram(std::string shaderPath)
 	///
 
 	//	attribute
+	uniforms.grayScale = glGetUniformLocation(program, "grayScale");
+	///uniforms.colorOffset = glGetUniformLocation(program, "u_color");
+
 	/*fxRadiusID = glGetUniformLocation(windowProgram, "fxRadius");
 	colorErrorID = glGetUniformLocation(windowProgram, "colorError");
 	zaTimeID = glGetUniformLocation(windowProgram, "time");*/
@@ -99,6 +116,10 @@ void WindowShader::Render()
 	glBindTexture(GL_TEXTURE_2D, FBODataTexture);
 	glBindVertexArray(vao);
 	glUseProgram(program);
+	glUniform1f(uniforms.grayScale, grayScale);
+	cout << "grayScale = " << grayScale << "\n";
+	///glUniform4f(uniforms.colorOffset, 0, 0, 0, 0);
+
 	glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 	///glutSwapBuffers();
 }

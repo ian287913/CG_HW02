@@ -382,7 +382,7 @@ void My_Display()
 		///	fire
 		///DrawAnimation(animations[CharacterIndex], parentMatrix, 0, vec4(0.4, 0.2f, -0.4f, 0));
 		///	laser
-		DrawAnimation(animations[CharacterIndex], parentMatrix, 0, vec4(0.4, 0.2f, 0.1f, 0));
+		DrawAnimation(animations[CharacterIndex], parentMatrix, 0, vec4(0.4, 0.2f, -0.2f, 0));
 	}
 
 	if (myGameState != NULL)
@@ -783,11 +783,11 @@ void DrawFont(string input, int trans, int enable)
 	float padding = 0;
 	vec4 colorAdd;
 	if (enable == 0)
-		colorAdd = vec4(0, 0, 0, 0);
+		colorAdd = vec4(0.03, 0.03, 0.15, -0.05f);
 	else if (enable == 1)
 		colorAdd = vec4(0.3f, 0.3f, 0.3f, 0);
 	else if (enable == 2)
-		colorAdd = vec4(0.9f, 0, 0, 0);
+		colorAdd = vec4(0.9f, 0.05f, 0.2f, 0);
 	bool skiping = false;
 	for (int i = 0; i < input.length(); i++)
 	{

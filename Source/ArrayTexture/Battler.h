@@ -70,7 +70,8 @@ float Battler::Damage(float amount)
 {
 	// cout << "Battler " << this->id << ": get damage: " << amount << endl;
 	this->hp -= amount;
-	ParticleSystem::CreateInstance(50, "Hit", vec2(0, 6.28f), vec2(-0.001f, -1.5f),
+	ParticleSystem::CreateInstance(vec3(this->position, this->height + this->distance * GameObject::depthRatio + 0.3f, 0),
+		50, "Hit", vec2(0, 6.28f), vec2(-0.001f, -1.5f),
 		vec2(0.0f, 0.2f), 0.2f, 0.2f,
 		vec2(0, 6.28f), vec2(0.3f, 0.4f), 0.3, 1.0f);
 	/*	parameters:

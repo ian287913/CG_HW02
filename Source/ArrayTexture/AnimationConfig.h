@@ -27,6 +27,7 @@ struct AnimationConfig
 	int colCount;
 	float anchorOffsetX;
 	float anchorOffsetY;
+	float anchorScale;
 	float shadowOffsetX;
 	float shadowOffsetY;
 	float shadowScale;
@@ -45,10 +46,13 @@ Super	(high damage & health, kb-resist)
 
 vector<AnimationConfig> AnimationConfigTable{
 	//{ "L_Basic", "/Lionar/f1_tank.png" , 12, 6},
-	{ "L_Tank"	, "/Lionar/f1_tank.png"					, 12, 6		, 0.0f, 0.25f	, 0.02f, -0.3f, 0.56f},
-	{ "L_Ranger", "/Lionar/f1_backlinearcher.png"		, 8, 16		, 0.0f, 0.35f	, 0.04f, -0.33f, 0.45f},
-	{ "L_Tower"	, "/Lionar/f1_ironcliffemonument.png"	, 10, 10	, 0.0f, 0.3f	, 0.0f, -0.33f, 0.56f},
-	{ "Icon_Ultimate"	, "/Icon/icon_f1_tempest.png"	, 5, 5		, 0.0f, 0.0f	, 0.0f, 0.0f, 0.0f},
+	{ "L_Tank"	, "/Lionar/f1_tank.png"					, 12, 6		, 0.0f, 0.25f, 1.0f		, 0.02f, -0.3f, 0.56f},
+	{ "L_Ranger", "/Lionar/f1_backlinearcher.png"		, 8, 16		, 0.0f, 0.35f, 1.0f		, 0.04f, -0.33f, 0.45f},
+	{ "L_Tower"	, "/Lionar/f1_ironcliffemonument.png"	, 10, 10	, 0.0f, 0.3f, 1.0f		, 0.0f, -0.33f, 0.56f},
+	{ "Icon_Ultimate"		, "/Icon/icon_f1_tempest.png"	, 5, 5		, 0.0f, 0.0f, 1.0f		, 0.0f, 0.0f, 0.0f},
+	{ "FX_BeamFire"			, "/FX/fx_beamfire.png"				, 5, 7		, 0.0f, 0.4f, 9.0f		, 0.0f, 0.0f, 0.0f},
+	{ "FX_BeamLaser"		, "/FX/fx_beamlaser.png"			, 2, 17		, 0.0f, 0.4f, 7.0f		, 0.0f, 0.0f, 0.0f},
+	{ "FX_BeamLaser_Fixed"	, "/FX/fx_beamlaser_fixed.png"		, 2, 17		, 0.0f, 0.154f, 7.0f		, 0.0f, 0.0f, 0.0f},
 };
 
 vector<AnimFrameSet> AnimFrameSetTable{
@@ -77,6 +81,14 @@ vector<AnimFrameSet> AnimFrameSetTable{
 	{ "Icon_Ultimate", "idle",			{	{1, 3}, {3, 1}, {3, 0}, {2, 4}, {2, 3}, {2, 2}}, {}, 3, true },
 	{ "Icon_Ultimate", "run",			{	{2, 1}, {2, 0}, {1, 4}, {3, 2}, {1, 2}, {1, 1}, {1, 0}, {0, 4}, {0, 3}, {0, 2}, {0, 1}, {0, 0}}, {}, 6, true },
 
+	{ "FX_BeamFire", "idle",				{	{4, 3}, {4, 2}, {4, 1}, {4, 0}, {3, 4}, {3, 3}, {3, 2}, {3, 1}, {6, 0}, {2, 4}, {2, 3}, {2, 2}, {2, 1}, {2, 0}, {1, 4}, {1, 3}, {1, 2}, {1, 1}, {1, 0}, {0, 4}, {0, 3}, {0, 2}, {0, 1}, {0, 0}}, {}, 10, false },
+	{ "FX_BeamFire", "run",			{	{3, 0}, {5, 4}, {5, 3}, {5, 2}, {5, 1}, {5, 0}, {4, 4}, {4, 3}, {4, 2}, {4, 1}, {4, 0}, {3, 4}, {3, 3}, {3, 2}, {3, 1}, {6, 0}, {2, 4}, {2, 3}, {2, 2}, {2, 1}, {2, 0}, {1, 4}, {1, 3}, {1, 2}, {1, 1}, {1, 0}, {0, 4}, {0, 3}, {0, 2}, {0, 1}, {0, 0}}, {}, 2, true },
+
+	{ "FX_BeamLaser", "idle",			{	{8, 0}, {15, 1}, {15, 0}, {14, 1}, {14, 0}, {13, 1}, {13, 0}, {12, 1}, {12, 0}, {11, 1}, {11, 0}, {10, 1}, {10, 0}, {9, 1}, {9, 0}, {8, 1}, {16, 0}, {7, 1}, {7, 0}, {6, 1}, {6, 0}, {5, 1}, {5, 0}, {4, 1}, {4, 0}, {3, 1}, {3, 0}, {2, 1}, {2, 0}, {1, 1}, {1, 0}, {0, 1}, {0, 0}}, {}, 6, true },
+
+	{ "FX_BeamLaser_Fixed", "idle",		{	{5, 0}, {4, 1}, {4, 0}, {4, 1}, {5, 0}, {4, 1}, {4, 0}, {3, 1}, {3, 0}, {2, 1}, {2, 0}, {1, 1}, {1, 0}, {0, 1}, {0, 0}}, {}, 10, false },
+	{ "FX_BeamLaser_Fixed", "run",			{	{8, 0}, {15, 1}, {15, 0}, {14, 1}, {14, 0}, {13, 1}, {13, 0}, {12, 1}, {12, 0}, {11, 1}, {11, 0}, {10, 1}, {10, 0}, {9, 1}, {9, 0}, {8, 1}, {16, 0}, {7, 1}, {7, 0}, {6, 1}, {6, 0}, {5, 1}, {5, 0}, {4, 1}, {4, 0}, {3, 1}, {3, 0}, {2, 1}, {2, 0}, {1, 1}, {1, 0}, {0, 1}, {0, 0}}, {}, 6, true },
+
 };
 
 struct SpriteAndFramesets
@@ -86,6 +98,7 @@ struct SpriteAndFramesets
 	vector<AnimFrameSet> frameSets;
 	float anchorOffsetX;
 	float anchorOffsetY;
+	float anchorScale;
 	float shadowOffsetX;
 	float shadowOffsetY;
 	float shadowScale;
@@ -152,8 +165,15 @@ void Animation::InitializeAllSpritesAndSets(string imagePath)
 			}
 		}
 
+		if (newAnimationData->frameSets.size() <= 0)
+		{
+			cout << "###\t frameSets.size() <= 0   : " << config.name << ".\N";
+
+		}
+
 		newAnimationData->anchorOffsetX = config.anchorOffsetX;
 		newAnimationData->anchorOffsetY = config.anchorOffsetY;
+		newAnimationData->anchorScale = config.anchorScale;
 
 		newAnimationData->shadowOffsetX = config.shadowOffsetX;
 		newAnimationData->shadowOffsetY = config.shadowOffsetY;
@@ -190,7 +210,7 @@ Animation::Animation(string characterName)
 	spriteSheet = foundSpriteAndFramesets->spriteSheet;
 	frameSets = &(foundSpriteAndFramesets->frameSets);
 	//	set anchor offset
-	anchorTranslate = translate(foundSpriteAndFramesets->anchorOffsetX, foundSpriteAndFramesets->anchorOffsetY, 0);
+	anchorTranslate = scale(foundSpriteAndFramesets->anchorScale, foundSpriteAndFramesets->anchorScale, 1.0f) * translate(foundSpriteAndFramesets->anchorOffsetX, foundSpriteAndFramesets->anchorOffsetY, 0);
 	//	set shadow offsets
 	shadowOffsetX = foundSpriteAndFramesets->shadowOffsetX;
 	shadowOffsetY = foundSpriteAndFramesets->shadowOffsetY;
@@ -198,6 +218,10 @@ Animation::Animation(string characterName)
 	
 	if (frameSets->size() > 0)
 		currentSet = &((*frameSets)[0]);
+	else
+	{
+		cout << "##\t frameSets.size <= 0.  " << characterName << "\n";
+	}
 }
 
 void Animation::Elapse(float deltaTime)

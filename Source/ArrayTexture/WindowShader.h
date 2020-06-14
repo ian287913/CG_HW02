@@ -117,7 +117,6 @@ void WindowShader::Render()
 	glBindVertexArray(vao);
 	glUseProgram(program);
 	glUniform1f(uniforms.grayScale, grayScale);
-	cout << "grayScale = " << grayScale << "\n";
 	///glUniform4f(uniforms.colorOffset, 0, 0, 0, 0);
 
 	glDrawArrays(GL_TRIANGLE_FAN, 0, 4);

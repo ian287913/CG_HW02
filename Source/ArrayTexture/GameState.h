@@ -56,6 +56,7 @@ public:
 	static const float laserSpeed;
 	static const float laserFireOffset;
 	static const int enemySellectWeight[ENMYNUM];
+	static const int enemySellectCD[ENMYNUM];
 	
 	int currentMoney;
 	int currentLevel;
@@ -82,6 +83,7 @@ public:
 	~GameState();
 protected:
 	float AICDing;
+	float AINextCD;
 	float laserTimer;
 	vector<BattleObject*> laseredObjects;
 	float laseringRange;
@@ -114,6 +116,7 @@ const float GameState::laserRange = 15;
 const float GameState::laserSpeed = 60;
 const float GameState::laserFireOffset = 1.2f;
 const int GameState::enemySellectWeight[ENMYNUM] = {4, 1, 1};
+const int GameState::enemySellectCD[ENMYNUM] = {5, 16, 23};
 
 // .cpp
 
@@ -341,13 +344,13 @@ void GameState::EnemyAI(float deltaTime)
 			if (randomIndex < 0)
 			{
 				AddBattler(i, true);
+				AINextCD = enemySellectCD[i];
+				cout << "enemy next CD: " << AINextCD << endl;
 				break;
 			}
 		}
-		AICDing = AICD + (AICD_range * 2) * rand() / (RAND_MAX + 1.0) - AICD_range;
+		AICDing = AINextCD + (AICD_range * 2) * rand() / (RAND_MAX + 1.0) - AICD_range;
 	}
-	
-	
 }
 
 void GameState::KillAll(bool toEnemy)
@@ -381,6 +384,7 @@ GameState::GameState()
 	laseringRange = laserRange;
 	laseredObjects = vector<BattleObject*>();
 	AICDing = AICD;
+	AINextCD = AICD;
 	allWeights = 0;
 	for (int i = 0; i < ENMYNUM; i++)
 	{

@@ -283,8 +283,8 @@ void DrawAnimation(Animation* anim, glm::mat4 _matrix, float fading = 0.0f, glm:
 	anim->Enable();
 	glUniformMatrix4fv(uniforms.mv_matrix, 1, GL_FALSE, value_ptr(m_camera.GetViewMatrix() * m_camera.GetModelMatrix() * _matrix * anim->spriteSheet->GetModelMat()));
 	///	anchor�վ��:
-	///glUniformMatrix4fv(uniforms.mv_matrix, 1, GL_FALSE, value_ptr(m_camera.GetViewMatrix() * m_camera.GetModelMatrix() * _matrix * translate(0, debug_x, 0) * anim->spriteSheet->GetModelMat()));
-	glUniformMatrix4fv(uniforms.proj_matrix, 1, GL_FALSE, value_ptr(m_camera.GetProjectionMatrix(aspect)));
+	glUniformMatrix4fv(uniforms.mv_matrix, 1, GL_FALSE, value_ptr(m_camera.GetViewMatrix() * m_camera.GetModelMatrix() * _matrix * translate(0, debug_x, 0) * anim->spriteSheet->GetModelMat()));
+	///glUniformMatrix4fv(uniforms.proj_matrix, 1, GL_FALSE, value_ptr(m_camera.GetProjectionMatrix(aspect)));
 	glUniform1f(uniforms.fading, fading);
 	glUniform1f(uniforms.grayScale, grayScale);
 	glUniform4f(uniforms.color, color.r, color.g, color.b, color.a);
@@ -379,11 +379,11 @@ void My_Display()
 	if (DEBUG_MODE)
 	{
 		mat4 parentMatrix = animations[CharacterIndex]->anchorTranslate;
-		///DrawAnimation(animations[CharacterIndex], parentMatrix);
+		DrawAnimation(animations[CharacterIndex], parentMatrix);
 		///	fire
 		///DrawAnimation(animations[CharacterIndex], parentMatrix, 0, vec4(0.4, 0.2f, -0.4f, 0));
 		///	laser
-		DrawAnimation(animations[CharacterIndex], parentMatrix, 0, vec4(0.4, 0.2f, -0.2f, 0));
+		///DrawAnimation(animations[CharacterIndex], parentMatrix, 0, vec4(0.4, 0.2f, -0.2f, 0));
 	}
 
 	if (myGameState != NULL)
@@ -412,11 +412,14 @@ void My_Display()
 
 	////////////////	Draw foreground		//////////////////////////////////////////////
 
-	ParticleSystem::RenderInstances(m_camera, aspect);
+	ParticleSystem::RenderInstances(m_camera, aspect, false);
 
 	////////////////	scene post FX		//////////////////////////////////////////////
 
 	WindowShader::Render();
+
+	ParticleSystem::RenderInstances(m_camera, aspect, true);
+
 	
 	////////////////	Draw UI				//////////////////////////////////////////////
 
@@ -531,7 +534,7 @@ void My_Display()
 	if (DEBUG_MODE)
 	{
 		//	Debug axis
-		DrawSprite(DebugSprite, translate(0, 0, 0), vec3(0, 0, 0), vec3(4, 4, 1));
+		DrawSprite(DebugSprite, translate(0, 0, 0), vec3(0, 0, 0), vec3(1, 1, 1));
 		///DrawSprite(DebugSprite, translate(1, 1, 0), vec3(0, 0, 0), vec3(4, 4, 1));
 	}
 
@@ -618,10 +621,21 @@ void My_Keyboard(unsigned char key, int x, int y)
 	switch (key)
 	{
 	case 'w':
-		ParticleSystem::CreateInstance(vec3(6.8, -1, 0),
+		//	fire
+		/*ParticleSystem::CreateInstance(vec3(0, -1, 0),
+			10, "Fire", vec2(3.0/2.0, 3.2/2.0), vec2(2.0f, 4.0f),
+			vec2(0.0f, 0.3f), 0.3f, 0.6f,
+			vec2(0, 6.28), vec2(0.2f, 0.5f), 4, 1.0f, true);*/
+		//	rays
+		ParticleSystem::CreateInstance(vec3(0, -1, 0),
+			10, "RayP", vec2(3.14 / 2.0, 3.14 / 2.0), vec2(2.0f, 4.0f),
+			vec2(0.0f, 3.0f), 14.0f, 1.0f,
+			vec2(0, 0), vec2(3.0f, 3.5f), 4, 8.0f, true);
+		//	charging particle
+		/*ParticleSystem::CreateInstance(vec3(6.8, -1, 0),
 			5, "Charge", vec2(0, 6.28), vec2(-1.9f, -4.0f),
 			vec2(2.0f, 4.0f), 1.5f, 1.0f,
-			vec2(0, 6.28f), vec2(0.6f, 1.0f), 1, 2.0f);
+			vec2(0, 6.28f), vec2(0.6f, 1.0f), 1, 2.0f);*/
 		/*ParticleSystem::CreateInstance(vec3(2,0,0),
 			50, "Hit", vec2(0, 6.28f), vec2(-0.001f, -1.5f),
 			vec2(0.0f, 0.5f), 1.8f, 0.5f,
@@ -631,13 +645,16 @@ void My_Keyboard(unsigned char key, int x, int y)
 			_spawnRadiusLH,	_fadeRadius, _fadeDistance,
 			_rotationLH, _scaleLH, _lifetime, _timeSpeed)
 		*/
-		WindowShader::colorScale += 0.2f;
 
 		debug_y += 0.2f;
 		cout << "debug_y = " << debug_y << "\n";
 		break;
 	case 's':
-		WindowShader::colorScale -= 0.2f;
+		//	charging particle
+		ParticleSystem::CreateInstance(vec3(6.8, -1, 0),
+			5, "ChargeI", vec2(0, 6.28), vec2(-1.9f, -4.0f),
+			vec2(2.0f, 4.0f), 1.5f, 1.0f,
+			vec2(0, 6.28f), vec2(0.6f, 1.0f), 1, 2.0f, true);
 
 		debug_y -= 0.2f;
 		cout << "debug_y = " << debug_y << "\n";
@@ -646,9 +663,9 @@ void My_Keyboard(unsigned char key, int x, int y)
 		//WindowShader::grayScale += 0.2f;
 
 		//	simulate a laser FX:
-		///WindowShader::AddFxTask({ 0.0f, "ColorScale", 0.7f, 0.15f });
-		///WindowShader::AddFxTask({ 1500.0f, "ColorScale", 4.0f, 0.1f });
-		///WindowShader::AddFxTask({ 2000.0f, "ColorScale", 1.0f, 0.03f});
+		WindowShader::AddFxTask({ 0.0f, "ColorScale", 0.7f, 0.15f });
+		WindowShader::AddFxTask({ 1500.0f, "ColorScale", 4.0f, 0.1f });
+		WindowShader::AddFxTask({ 2000.0f, "ColorScale", 1.0f, 0.03f});
 
 
 		debug_x += 0.05f;

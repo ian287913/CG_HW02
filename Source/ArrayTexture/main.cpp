@@ -399,11 +399,26 @@ void My_Display()
 	}
 	for (int i = 0; i < CHARNUM; i++)
 	{
-		DrawAnimation(UI_Button_chara[i], translate(UI_trans[i][0], UI_trans[i][1] - UI_Button_chara_size, 0) * scale(-character_scale[i], character_scale[i], 1) * UI_Button_chara[i]->anchorTranslate);
+		vec4 enable = (myGameState->CanAdd(i)) ? vec4(0, 0, 0, 0) : vec4(-0.5f, -0.5f, -0.4f, 0);
+		DrawAnimation(
+			UI_Button_chara[i], 
+			translate(UI_trans[i][0], UI_trans[i][1] - UI_Button_chara_size, 0) 
+			* scale(-character_scale[i], character_scale[i], 1) 
+			* UI_Button_chara[i]->anchorTranslate,
+			0.0f,
+			enable
+		);
 	}
 
 	// draw money lv up button UI
-	DrawSprite(UI_Button_money, translate(0, 0, 0), vec3(UI_trans[5][0], UI_trans[5][1], 0), vec3(UI_trans[5][2], UI_trans[5][2], 1));
+	{
+		vec4 enable = (myGameState->CanLevelUp())? vec4(0,0,0,0) : vec4(-0.5f, -0.5f, -0.4f, 0);
+		DrawSprite(UI_Button_money, translate(0, 0, 0), 
+			vec3(UI_trans[5][0], UI_trans[5][1], 0), 
+			vec3(UI_trans[5][2], UI_trans[5][2], 1),
+			0.0f, enable
+		);
+	}
 	// darw laser button UI
 
 	if (isGameOver)
@@ -631,7 +646,7 @@ void UIButton(float x, float y)
 			if (sqrtf(pow(x - UI_pos[0], 2) + pow(y - UI_pos[1], 2)) < range)
 			{
 				// cout << "press character button " << i << endl;
-				myGameState->AddBattler(character_names[i], false);
+				myGameState->AddBattler(i, false);
 				return;
 			}
 		}
@@ -653,6 +668,7 @@ void UIButton(float x, float y)
 	}
 	else
 	{
+		// game over UI
 		float restart_size[2] = 
 		{
 			((modelToCam * vec4(UI_Button_restart_size[0], 0, 0, 1)).x / 2) * camara_shape[0] * 1.5f,

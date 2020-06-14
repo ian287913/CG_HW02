@@ -9,12 +9,16 @@ in VertexData
 } vertexData;
 in float fadingColor;
 in vec4 offsetColor;
+in float grayScaleValue;
 
 uniform sampler2DArray tex;
 
 void main()
 {
 	fragColor = texture(tex, vec3(vertexData.texcoord, vertexData.spriteIndex)) + offsetColor;
+	float grayscale_color = 0.299*fragColor.r + 0.587*fragColor.g + 0.114*fragColor.b;
+	fragColor = (vec4(grayscale_color, grayscale_color, grayscale_color, fragColor.a) * grayScaleValue) + (fragColor * (1.0f - grayScaleValue));
+
 	//	remove negative offset result
 	fragColor.r = fragColor.r < 0 ? 0 : fragColor.r;
 	fragColor.g = fragColor.g < 0 ? 0 : fragColor.g;

@@ -6,6 +6,7 @@ layout(location = 1) in int spriteIndex;
 uniform mat4 um4mv;
 uniform mat4 um4p;
 uniform float fading;
+uniform float grayScale;
 uniform vec4 color;
 
 out VertexData
@@ -15,6 +16,7 @@ out VertexData
 } vertexData;
 
 out float fadingColor;
+out float grayScaleValue;
 out vec4 offsetColor;
 
 const vec2[] points = vec2[4](vec2(-0.5, -0.5), vec2(0.5, -0.5), vec2(-0.5, 0.5), vec2(0.5, 0.5));
@@ -28,6 +30,8 @@ void main()
 
 	//	die fading
 	fadingColor = fading;
+	//	grayScale
+	grayScaleValue = grayScale;
 	//	offset color
 	offsetColor = color;
 }

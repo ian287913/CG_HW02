@@ -1,5 +1,6 @@
 #pragma once
 #include"GameObject.h"
+#include "ParticleSystem.h"
 
 struct BOConfig
 {
@@ -45,6 +46,14 @@ float BattleObject::Damage(float amount)
 {
 	// cout << "BattleObject " << this->id << ": get damage: " << amount << endl;
 	this->hp -= amount;
+	ParticleSystem::CreateInstance(50, "Hit", vec2(0, 6.28f), vec2(-0.001f, -1.5f),
+		vec2(0.0f, 0.2f), 0.2f, 0.2f,
+		vec2(0, 6.28f), vec2(0.3f, 0.4f), 0.3, 1.0f);
+	/*	parameters:
+								  ( _amount, _spriteName, _directionLH, _speedLH,
+		_spawnRadiusLH,	_fadeRadius, _fadeDistance,
+		_rotationLH, _scaleLH, _lifetime, _timeSpeed)
+	*/
 	if (this->hp <= 0 && !isDying)
 	{
 		this->hp = 0;

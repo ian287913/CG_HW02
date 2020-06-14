@@ -6,7 +6,6 @@
 #include "SpriteObject.h"
 #include <vector>
 #include "GameState.h"
-#include "ParticleSystem.h"
 #include "TranslateRoteteScaleHelper.h"
 #include "WindowShader.h"
 
@@ -14,7 +13,7 @@ using namespace glm;
 using namespace std;
 
 #define UPDATE_CYCLE 33		//	(mini second)
-#define UINUM 5				//	UI���Ӽ�
+#define UINUM 7				//	UI number
 
 //uniform id
 struct
@@ -60,17 +59,23 @@ float camara_shape[2] = { 0, 0 };
 void CharacterButton(float x, float y);
 Sprite2D* UI_Button_chara_back;
 Sprite2D* UI_Button_chara_frame;
+Sprite2D* UI_Button_money;
+Sprite2D* UI_Button_laser;
 Animation* UI_Button_chara[CHARNUM];
 const string character_names[CHARNUM] = {"L_Tank", "L_Ranger", "L_Tank", "L_Tank", "L_Tank"};
 const float character_scale[CHARNUM] = {1.8f, 2.16f, 1.8f, 1.8f, 1.8f};
 const float UI_Button_chara_size = 0.3f;
-const float UI_trans[UINUM][4] = 
+const float UI_Button_money_size = 0.9f;
+const float UI_Button_laser_size = 0.3f;
+const float UI_trans[UINUM][3] = 
 { 
-	{-3.6f,	-3.8f,		1.8f},
-	{-1.8f, -3.8f,		1.8f},
-	{0,		-3.8f,		1.8f},
-	{1.8f,	-3.8f,		1.8f},
-	{3.6f,	-3.8f,		1.8f}
+	{-3.6f,		-3.6f,		1.8f},
+	{-1.8f,		-3.6f,		1.8f},
+	{0,			-3.6f,		1.8f},
+	{1.8f,		-3.6f,		1.8f},
+	{3.6f,		-3.6f,		1.8f},
+	{-9.0f,		-3.8f,		3.0f},
+	{9.0f,		-3.6f,		3.0f}
 };
 //
 
@@ -139,6 +144,8 @@ void My_LoadTextures()
 		Animation* anim = new Animation(character_names[i]);
 		UI_Button_chara[i] = anim;
 	}
+	UI_Button_money = new Sprite2D();
+	UI_Button_money->Init(ImagePath + "Money_button.png", 1, 1, 24, false, 0, 0);
 	
 	//	Debug axis
 	DebugSprite = new Sprite2D();
@@ -361,15 +368,20 @@ void My_Display()
 	
 	////////////////	Draw UI				//////////////////////////////////////////////
 
-	for (int i = 0; i < UINUM; i++)
+	// draw character buttons
+	for (int i = 0; i < CHARNUM; i++)
 	{
 		DrawSprite(UI_Button_chara_back, translate(0, 0, 0), vec3(UI_trans[i][0], UI_trans[i][1], 0), vec3(UI_trans[i][2], UI_trans[i][2], 1));
 		DrawSprite(UI_Button_chara_frame, translate(0, 0, 0), vec3(UI_trans[i][0], UI_trans[i][1], 0), vec3(UI_trans[i][2], UI_trans[i][2], 1));
 	}
 	for (int i = 0; i < CHARNUM; i++)
 	{
-		DrawAnimation(UI_Button_chara[i], translate(UI_trans[i][0], UI_trans[i][1] - UI_Button_chara_size, 0) * scale(character_scale[i], character_scale[i], 1) * UI_Button_chara[i]->anchorTranslate);
+		DrawAnimation(UI_Button_chara[i], translate(UI_trans[i][0], UI_trans[i][1] - UI_Button_chara_size, 0) * scale(-character_scale[i], character_scale[i], 1) * UI_Button_chara[i]->anchorTranslate);
 	}
+
+	// draw money lv up button UI
+	DrawSprite(UI_Button_money, translate(0, 0, 0), vec3(UI_trans[5][0], UI_trans[5][1], 0), vec3(UI_trans[5][2], UI_trans[5][2], 1));
+	// darw laser button UI
 
 	if (DEBUG_MODE)
 	{
@@ -560,25 +572,44 @@ void My_Mouse_Moving(int x, int y) {
 
 void CharacterButton(float x, float y)
 {
-	// cout << "camShape: " << camara_shape[0] << ", " << camara_shape[1] << endl;
+	// define mvp transform matrix
 	mat4 modelToCam = m_camera.GetProjectionMatrix(aspect) * m_camera.GetViewMatrix() * m_camera.GetModelMatrix()
 		* translate(0, 0, 0);
 	float range = ((modelToCam * vec4(UI_Button_chara_size, 0, 0, 1)).x / 2) * camara_shape[0] * 1.5f;
-	// cout << "range: " << range << endl;
+	float range_money = ((modelToCam * vec4(UI_Button_money_size, 0, 0, 1)).x / 2) * camara_shape[0] * 1.5f;
+	
+	// character button
 	for (int i = 0; i < CHARNUM; i++)
 	{
 		vec4 camPos = modelToCam * vec4(UI_trans[i][0], UI_trans[i][1], 0, 1);
 		float UI_pos[2] = 
 		{
 			(camPos.x/2 + 0.5f) * camara_shape[0],
-			(-camPos.y + 1.0f) * camara_shape[1] / 2
+			(-camPos.y/2 + 0.5f) * camara_shape[1]
 		};
 		if (sqrtf(pow(x - UI_pos[0], 2) + pow(y - UI_pos[1], 2)) < range)
 		{
-			cout << "press character button " << i << endl;
-			break;
+			// cout << "press character button " << i << endl;
+			myGameState->AddBattler(character_names[i], false);
+			return;
 		}
 	}
+	
+	// money button
+	{
+		vec4 camPos = modelToCam * vec4(UI_trans[5][0], UI_trans[5][1], 0, 1);
+		float UI_pos[2] =
+		{
+			(camPos.x / 2 + 0.5f) * camara_shape[0],
+			(-camPos.y / 2 + 0.5f) * camara_shape[1]
+		};
+		if (sqrtf(pow(x - UI_pos[0], 2) + pow(y - UI_pos[1], 2)) < range_money)
+		{
+			myGameState->LevelUp();
+			return;
+		}
+	}
+
 }
 
 int main(int argc, char *argv[])

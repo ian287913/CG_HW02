@@ -437,6 +437,7 @@ void My_Display()
 
 	WindowShader::Render();
 
+
 	if (inLaserBeam)
 	{
 		float rotatangle = 130.0f * (-laserBeamTimer / laserBeamTime) + 180.0f;
@@ -464,6 +465,9 @@ void My_Display()
 			DrawAnimation(laserFire[i], trans  * laserFire[i]->anchorTranslate, 0, vec4(0.4, 0.2f, -0.2f, 0));
 		}
 	}
+
+	ParticleSystem::RenderInstances(m_camera, aspect, true);
+
 	
 	////////////////	Draw UI				//////////////////////////////////////////////
 

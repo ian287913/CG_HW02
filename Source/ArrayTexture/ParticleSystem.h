@@ -95,6 +95,7 @@ std::vector<ParticleSystem> ParticleSystem::particleInstances;
 std::vector<ParticleSystem::ParticleSprite> ParticleSystem::ParticleSpriteTable
 {
 	{	"Hit",		"particle_hit.png",		NULL},
+	{	"Charge",	"particle_charge_b.png",	NULL},
 	{	"Fire",		"particle_fire.png",	NULL}
 };
 GLuint ParticleSystem::program;
@@ -236,7 +237,10 @@ void ParticleSystem::CreateInstance(glm::vec3 _position,
 		newParticle.layouts.rotation[i] = RandomFloat(_rotationLH.x, _rotationLH.y);
 		if (_speedLH.x < 0 && _speedLH.y < 0 && LengthOfVec2(newParticle.layouts.pos[i]) != 0)	//	sdirection = origin point ->pos
 		{
-			newParticle.layouts.direction[i] = NormalizedVec2(newParticle.layouts.pos[i]) * RandomFloat(-_speedLH.x, -_speedLH.y);
+			if (_speedLH.y < _speedLH.x)
+				newParticle.layouts.direction[i] = NormalizedVec2(newParticle.layouts.pos[i]) * RandomFloat(_speedLH.y, _speedLH.x);
+			else
+				newParticle.layouts.direction[i] = NormalizedVec2(newParticle.layouts.pos[i]) * RandomFloat(-_speedLH.x, -_speedLH.y);
 		}
 		else
 		{

@@ -592,12 +592,16 @@ void My_Keyboard(unsigned char key, int x, int y)
 	switch (key)
 	{
 	case 'w':
-		ParticleSystem::CreateInstance(vec3(2,0,0),
+		ParticleSystem::CreateInstance(vec3(6.8, -1, 0),
+			5, "Charge", vec2(0, 6.28), vec2(-1.9f, -4.0f),
+			vec2(2.0f, 4.0f), 1.5f, 1.0f,
+			vec2(0, 6.28f), vec2(0.6f, 1.0f), 1, 2.0f);
+		/*ParticleSystem::CreateInstance(vec3(2,0,0),
 			50, "Hit", vec2(0, 6.28f), vec2(-0.001f, -1.5f),
 			vec2(0.0f, 0.5f), 1.8f, 0.5f,
-			vec2(0, 6.28f), vec2(0.3f, 0.4f), 0.3, 1.0f);
+			vec2(0, 6.28f), vec2(0.3f, 0.4f), 0.3, 1.0f);*/
 		/*	parameters:
-									  ( _amount, _spriteName, _directionLH, _speedLH,
+			( _amount, _spriteName, _directionLH, _speedLH,
 			_spawnRadiusLH,	_fadeRadius, _fadeDistance,
 			_rotationLH, _scaleLH, _lifetime, _timeSpeed)
 		*/

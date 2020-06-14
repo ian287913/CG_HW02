@@ -397,11 +397,11 @@ void My_Display()
 	if (DEBUG_MODE)
 	{
 		mat4 parentMatrix = animations[CharacterIndex]->anchorTranslate;
-		///DrawAnimation(animations[CharacterIndex], parentMatrix);
+		DrawAnimation(animations[CharacterIndex], parentMatrix);
 		///	fire
 		///DrawAnimation(animations[CharacterIndex], parentMatrix, 0, vec4(0.4, 0.2f, -0.4f, 0));
 		///	laser
-		DrawAnimation(animations[CharacterIndex], parentMatrix, 0, vec4(0.4, 0.2f, -0.2f, 0));
+		///DrawAnimation(animations[CharacterIndex], parentMatrix, 0, vec4(0.4, 0.2f, -0.2f, 0));
 	}
 
 	if (myGameState != NULL)

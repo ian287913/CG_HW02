@@ -24,6 +24,17 @@ public:
 	static GLuint FBO;
 	static GLuint depthRBO;
 	static const GLfloat window_positions[];
+
+	//	uniforms
+	static struct Uniforms
+	{
+		GLint  grayScale;
+		GLint  colorOffset;
+		GLint  colorScale;
+	} uniforms;
+	static float grayScale;
+	static float colorScale;
+	static glm::vec4 colorOffset;
 };
 const GLfloat WindowShader::window_positions[] =
 {
@@ -32,6 +43,12 @@ const GLfloat WindowShader::window_positions[] =
 	-1.0f,1.0f,0.0f,1.0f,
 	1.0f,1.0f,1.0f,1.0f
 };
+
+//	uniforms
+struct WindowShader::Uniforms WindowShader::uniforms;
+float WindowShader::grayScale = 0;
+float WindowShader::colorScale = 1;
+glm::vec4 WindowShader::colorOffset = glm::vec4(0, 0, 0, 0);
 
 GLuint WindowShader::program;
 GLuint WindowShader::vao;
@@ -64,6 +81,10 @@ void WindowShader::InitShaderProgram(std::string shaderPath)
 	///
 
 	//	attribute
+	uniforms.grayScale = glGetUniformLocation(program, "u_grayScale");
+	uniforms.colorScale = glGetUniformLocation(program, "u_colorScale");
+	///uniforms.colorOffset = glGetUniformLocation(program, "u_color");
+
 	/*fxRadiusID = glGetUniformLocation(windowProgram, "fxRadius");
 	colorErrorID = glGetUniformLocation(windowProgram, "colorError");
 	zaTimeID = glGetUniformLocation(windowProgram, "time");*/
@@ -99,6 +120,10 @@ void WindowShader::Render()
 	glBindTexture(GL_TEXTURE_2D, FBODataTexture);
 	glBindVertexArray(vao);
 	glUseProgram(program);
+	glUniform1f(uniforms.grayScale, grayScale);
+	glUniform1f(uniforms.colorScale, colorScale);
+	///glUniform4f(uniforms.colorOffset, 0, 0, 0, 0);
+
 	glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 	///glutSwapBuffers();
 }

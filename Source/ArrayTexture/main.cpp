@@ -21,6 +21,7 @@ struct
 	GLint  mv_matrix;
 	GLint  proj_matrix;
 	GLint  fading;
+	GLint  color;
 } uniforms;
 
 
@@ -216,6 +217,7 @@ void My_Init()
 	uniforms.proj_matrix = glGetUniformLocation(program, "um4p");
 	uniforms.mv_matrix = glGetUniformLocation(program, "um4mv");
 	uniforms.fading = glGetUniformLocation(program, "fading");
+	uniforms.color = glGetUniformLocation(program, "color");
 
 	glUseProgram(program);
 	///////////////////////////	
@@ -238,7 +240,7 @@ void My_Init()
 }
 
 //	Draw a single animation (character)
-void DrawAnimation(Animation* anim, glm::mat4 _matrix, float fading = 0.0f)
+void DrawAnimation(Animation* anim, glm::mat4 _matrix, float fading = 0.0f, glm::vec4 color = glm::vec4(0.0f, 0.0f, 0.0f, 0.0f))
 {
 	glm::vec2 pos[1];
 	int frame[1];
@@ -261,6 +263,7 @@ void DrawAnimation(Animation* anim, glm::mat4 _matrix, float fading = 0.0f)
 	///glUniformMatrix4fv(uniforms.mv_matrix, 1, GL_FALSE, value_ptr(m_camera.GetViewMatrix() * m_camera.GetModelMatrix() * _matrix * translate(0, debug_x, 0) * anim->spriteSheet->GetModelMat()));
 	glUniformMatrix4fv(uniforms.proj_matrix, 1, GL_FALSE, value_ptr(m_camera.GetProjectionMatrix(aspect)));
 	glUniform1f(uniforms.fading, fading);
+	glUniform4f(uniforms.color, color.r, color.g, color.b, color.a);
 
 	glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, 1);
 	anim->Disable();
@@ -270,7 +273,7 @@ void DrawAnimation(Animation* anim, glm::mat4 _matrix, float fading = 0.0f)
 }
 
 //	draw only one-frame sprite
-void DrawSprite(Sprite2D* _sprite, glm::mat4 _parentMatrix, const vec3& _position, const vec3& _scale, float fading = 0.0f)
+void DrawSprite(Sprite2D* _sprite, glm::mat4 _parentMatrix, const vec3& _position, const vec3& _scale, float fading = 0.0f, glm::vec4 color = glm::vec4(0.0f, 0.0f, 0.0f, 0.0f))
 {
 	glm::vec2 pos[1];
 	int frame[1];
@@ -291,6 +294,7 @@ void DrawSprite(Sprite2D* _sprite, glm::mat4 _parentMatrix, const vec3& _positio
 	glUniformMatrix4fv(uniforms.mv_matrix, 1, GL_FALSE, value_ptr(m_camera.GetViewMatrix() * m_camera.GetModelMatrix() * _parentMatrix * translate(_position) * scale(_scale) * _sprite->GetModelMat()));
 	glUniformMatrix4fv(uniforms.proj_matrix, 1, GL_FALSE, value_ptr(m_camera.GetProjectionMatrix(aspect)));
 	glUniform1f(uniforms.fading, fading);
+	glUniform4f(uniforms.color, color.r, color.g, color.b, color.a);
 	glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, 1);
 	_sprite->Disable();
 
@@ -312,18 +316,20 @@ void My_Display()
 {
 	WindowShader::BindFrameBuffer();
 
-	glClearColor(0.5f, 0.5f, 0.5f, 0.0f);
+	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	////////////////	Draw background		//////////////////////////////////////////////
 	
-	DrawSprite(BackgroundSprite, translate(0, 0, 0), vec3(0, 0, 0), vec3(9, 9, 1));
+	DrawSprite(BackgroundSprite, translate(0, 0, 0), vec3(0, 0, 0), vec3(-9, 9, 1), 0, glm::vec4(0, 0, 0, 0));
 
 
 	////////////////	Draw shadows		//////////////////////////////////////////////
-	//mat4 parentMatrix = translate(0, 0, 0) * scale(1, 1, 1);
-	mat4 parentMatrix = animations[CharacterIndex]->anchorTranslate;
-	DrawSprite(ShadowSprite, parentMatrix, vec3(animations[CharacterIndex]->shadowOffsetX, animations[CharacterIndex]->shadowOffsetY, 0), vec3(animations[CharacterIndex]->shadowScale, animations[CharacterIndex]->shadowScale, 1));
+	if (DEBUG_MODE)
+	{
+		mat4 parentMatrix = animations[CharacterIndex]->anchorTranslate;
+		DrawSprite(ShadowSprite, parentMatrix, vec3(animations[CharacterIndex]->shadowOffsetX, animations[CharacterIndex]->shadowOffsetY, 0), vec3(animations[CharacterIndex]->shadowScale, animations[CharacterIndex]->shadowScale, 1));
+	}
 	if (myGameState != NULL)
 	{
 		for (int i = GameObject::actors.size() - 1; i >= 0; i--)
@@ -345,8 +351,12 @@ void My_Display()
 	}
 
 	////////////////	Draw characters		//////////////////////////////////////////////
+	if (DEBUG_MODE)
+	{
+		mat4 parentMatrix = animations[CharacterIndex]->anchorTranslate;
+		DrawAnimation(animations[CharacterIndex], parentMatrix);
+	}
 
-	DrawAnimation(animations[CharacterIndex], parentMatrix);
 	if (myGameState != NULL)
 	{
 		vector<GameObject*> sortedGO = GameObject::actors;
@@ -375,6 +385,10 @@ void My_Display()
 
 	ParticleSystem::RenderInstances(m_camera, aspect);
 
+	////////////////	scene post FX		//////////////////////////////////////////////
+
+	WindowShader::Render();
+	
 	////////////////	Draw UI				//////////////////////////////////////////////
 
 	// draw character buttons
@@ -414,8 +428,7 @@ void My_Display()
 	}
 
 	
-	////////////////	Post FX				//////////////////////////////////////////////
-	WindowShader::Render();
+	
 
 	glutSwapBuffers();
 }
@@ -491,7 +504,8 @@ void My_Keyboard(unsigned char key, int x, int y)
 	switch (key)
 	{
 	case 'w':
-		ParticleSystem::CreateInstance(50, "Hit", vec2(0, 6.28f), vec2(-0.001f, -1.5f),
+		ParticleSystem::CreateInstance(vec3(2,0,0),
+			50, "Hit", vec2(0, 6.28f), vec2(-0.001f, -1.5f),
 			vec2(0.0f, 0.5f), 1.8f, 0.5f,
 			vec2(0, 6.28f), vec2(0.3f, 0.4f), 0.3, 1.0f);
 		/*	parameters:
@@ -499,20 +513,24 @@ void My_Keyboard(unsigned char key, int x, int y)
 			_spawnRadiusLH,	_fadeRadius, _fadeDistance,
 			_rotationLH, _scaleLH, _lifetime, _timeSpeed)
 		*/
+		WindowShader::colorScale += 0.2f;
 
 		debug_y += 0.2f;
 		cout << "debug_y = " << debug_y << "\n";
 		break;
 	case 's':
-		
+		WindowShader::colorScale -= 0.2f;
+
 		debug_y -= 0.2f;
 		cout << "debug_y = " << debug_y << "\n";
 		break;
 	case 'd':
+		WindowShader::grayScale += 0.2f;
 		debug_x += 0.05f;
 		cout << "debug_x = " << debug_x << "\n";
 		break;
 	case 'a':
+		WindowShader::grayScale -= 0.2f;
 		debug_x -= 0.05f;
 		cout << "debug_x = " << debug_x << "\n";
 		break;

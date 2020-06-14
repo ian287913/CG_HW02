@@ -13,7 +13,7 @@ using namespace glm;
 using namespace std;
 
 #define UPDATE_CYCLE 33		//	(mini second)
-#define UINUM 11				//	UI number
+#define UINUM 20				//	UI number
 
 //uniform id
 struct
@@ -59,6 +59,10 @@ bool isGameOver = false;
 bool isWin = false;
 float camara_shape[2] = { 0, 0 };
 void UIButton(float x, float y);
+void DrawFont(string input, int trans, int enable = 0);
+Sprite2D* UI_font[13];
+const string UI_font_path[13] = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "slash", "unit", "max"};
+const float UI_font_dist = 0.5f;
 Sprite2D* UI_Button_chara_back;
 Sprite2D* UI_Button_chara_frame;
 Sprite2D* UI_Button_money;
@@ -82,13 +86,24 @@ const float UI_trans[UINUM][3] =
 	{1.8f,		-3.6f,		1.8f},
 	{3.6f,		-3.6f,		1.8f},
 
-	{-9.0f,		-3.8f,		3.0f},
-	{9.0f,		-3.6f,		3.0f},
+	{-9.0f,		-3.8f,		3.0f},	// money button
+	{9.0f,		-3.6f,		3.0f},	// laser button
 
 	{	0,			0,		10.0f},	// black
 	{	0,			0,		3.0f},	// victory title
 	{	0,			0,		3.0f},	// defeat title
-	{0.0f,		-3.0f,		1.0f}	// restart button
+	{0.0f,		-3.0f,		1.0f},	// restart button
+
+	{	-7,		0.6f,		0.5f},	// left tower hp
+	{	7,		0.6f,		0.5f},	// right tower hp
+	{	0,		  3.6,		1.0f},	// money
+	{-9.13f,	-3.7f,		0.6f},	// level
+
+	{-3.6f,		-4.0f,		0.45f},	// character cost 0~4
+	{-1.8f,		-4.0f,		0.45f},
+	{0,			-4.0f,		0.45f},
+	{1.8f,		-4.0f,		0.45f},
+	{3.6f,		-4.0f,		0.45f}
 };
 //
 
@@ -167,6 +182,11 @@ void My_LoadTextures()
 	UI_defeat_title->Init(ImagePath + "defeat_title.png", 1, 1, 24, false, 0, 0);
 	UI_Button_restart = new Sprite2D();
 	UI_Button_restart->Init(ImagePath + "restart_button.png", 1, 1, 24, false, 0, 0);
+	for (int i = 0; i < 13; i++)
+	{
+		UI_font[i] = new Sprite2D();
+		UI_font[i]->Init(ImagePath + UI_font_path[i] + ".png", 1, 1, 24, false, 0, 0);
+	}
 	
 	//	Debug axis
 	DebugSprite = new Sprite2D();
@@ -391,35 +411,75 @@ void My_Display()
 	
 	////////////////	Draw UI				//////////////////////////////////////////////
 
-	// draw character buttons
-	for (int i = 0; i < CHARNUM; i++)
+	if (myGameState != NULL)
 	{
-		DrawSprite(UI_Button_chara_back, translate(0, 0, 0), vec3(UI_trans[i][0], UI_trans[i][1], 0), vec3(UI_trans[i][2], UI_trans[i][2], 1));
-		DrawSprite(UI_Button_chara_frame, translate(0, 0, 0), vec3(UI_trans[i][0], UI_trans[i][1], 0), vec3(UI_trans[i][2], UI_trans[i][2], 1));
-	}
-	for (int i = 0; i < CHARNUM; i++)
-	{
-		vec4 enable = (myGameState->CanAdd(i)) ? vec4(0, 0, 0, 0) : vec4(-0.5f, -0.5f, -0.4f, 0);
-		DrawAnimation(
-			UI_Button_chara[i], 
-			translate(UI_trans[i][0], UI_trans[i][1] - UI_Button_chara_size, 0) 
-			* scale(-character_scale[i], character_scale[i], 1) 
-			* UI_Button_chara[i]->anchorTranslate,
-			0.0f,
-			enable
-		);
-	}
+		// draw character buttons
+		for (int i = 0; i < CHARNUM; i++)
+		{
+			DrawSprite(UI_Button_chara_back, translate(0, 0, 0), vec3(UI_trans[i][0], UI_trans[i][1], 0), vec3(UI_trans[i][2], UI_trans[i][2], 1));
+			DrawSprite(UI_Button_chara_frame, translate(0, 0, 0), vec3(UI_trans[i][0], UI_trans[i][1], 0), vec3(UI_trans[i][2], UI_trans[i][2], 1));
+		}
+		for (int i = 0; i < CHARNUM; i++)
+		{
+			vec4 enable = (myGameState->CanAdd(i)) ? vec4(0, 0, 0, 0) : vec4(-0.5f, -0.5f, -0.4f, 0);
+			DrawAnimation(
+				UI_Button_chara[i],
+				translate(UI_trans[i][0], UI_trans[i][1] - UI_Button_chara_size, 0)
+				* scale(-character_scale[i], character_scale[i], 1)
+				* UI_Button_chara[i]->anchorTranslate,
+				0.0f,
+				enable
+			);
+		}
 
-	// draw money lv up button UI
-	{
-		vec4 enable = (myGameState->CanLevelUp())? vec4(0,0,0,0) : vec4(-0.5f, -0.5f, -0.4f, 0);
-		DrawSprite(UI_Button_money, translate(0, 0, 0), 
-			vec3(UI_trans[5][0], UI_trans[5][1], 0), 
-			vec3(UI_trans[5][2], UI_trans[5][2], 1),
-			0.0f, enable
-		);
+		// draw money lv up button UI
+		{
+			vec4 enable = (myGameState->CanLevelUp()) ? vec4(0, 0, 0, 0) : vec4(-0.5f, -0.5f, -0.4f, 0);
+			DrawSprite(UI_Button_money, translate(0, 0, 0),
+				vec3(UI_trans[5][0], UI_trans[5][1], 0),
+				vec3(UI_trans[5][2], UI_trans[5][2], 1),
+				0.0f, enable
+			);
+		}
+		// darw laser button UI
+
+		// draw left hp
+		DrawFont(to_string(myGameState->leftTower->hp) + "s" + to_string(GameState::towerHP), 11);
+		// draw right hp
+		DrawFont(to_string(myGameState->rightTower->hp) + "s" + to_string(GameState::towerHP), 12);
+
+		// draw money
+		DrawFont(to_string(myGameState->currentMoney) + "s" + to_string(myGameState->maxMoney_level[myGameState->currentLevel]) + "u", 13);
+		// draw level up
+		if (myGameState->currentLevel < LVLNUM - 1)
+		{
+			if (myGameState->CanLevelUp())
+			{
+				DrawFont(to_string(myGameState->lvUP_cost[myGameState->currentLevel]), 14);
+			}
+			else
+			{
+				DrawFont(to_string(myGameState->lvUP_cost[myGameState->currentLevel]), 14, 2);
+			}
+		}
+		else
+		{
+			DrawFont("m", 14, 2);
+		}
+
+		// draw character cost
+		for (int i = 15; i < 20; i++)
+		{
+			if (myGameState->currentMoney >= GameState::cost[i-15])
+			{
+				DrawFont(to_string(GameState::cost[i - 15]), i);
+			}
+			else
+			{
+				DrawFont(to_string(GameState::cost[i - 15]), i, 2);
+			}
+		}
 	}
-	// darw laser button UI
 
 	if (isGameOver)
 	{
@@ -606,7 +666,8 @@ void My_Keyboard(unsigned char key, int x, int y)
 		myGameState->Laser();
 		break;
 	case 'm':
-		cout << "Game: money: " << (myGameState->currentMoney) << "/" << myGameState->maxMoney_level[myGameState->currentLevel] << endl;
+		cout << "CHEAT: money+ 1000" << endl;
+		myGameState->AddMoney(1000);
 		break;
 	case 'u':
 		myGameState->LevelUp();
@@ -694,6 +755,111 @@ void GameOverTitle(bool win)
 	cout << "Game: Calls game over title: " << (win? "victory" : "defeat") << endl;
 	isGameOver = true;
 	isWin = win;
+}
+void DrawFont(string input, int trans, int enable)
+{
+	float printX = UI_trans[trans][0];
+	float padding = 0;
+	vec4 colorAdd;
+	if (enable == 0)
+		colorAdd = vec4(0, 0, 0, 0);
+	else if (enable == 1)
+		colorAdd = vec4(0.3f, 0.3f, 0.3f, 0);
+	else if (enable == 2)
+		colorAdd = vec4(0.9f, 0, 0, 0);
+	bool skiping = false;
+	for (int i = 0; i < input.length(); i++)
+	{
+		float multi = 1.0f;
+		if (input[i] == 'u')
+		{
+			multi = 3.5f;
+			skiping = false;
+		}
+		else if (input[i] == 'm')
+		{
+			multi = 1.2f;
+			skiping = false;
+		}
+		else if (input[i] == 's')
+		{
+			skiping = false;
+		}
+		else if (input[i] == '.')
+			skiping = true;
+		if (skiping)
+			continue;
+		padding -= UI_font_dist * UI_trans[trans][2] * multi;
+	}
+	printX += padding / 2;
+	skiping = false;
+	for (int i = 0; i < input.length(); i++)
+	{
+		if (input[i] == '.')
+			skiping = true;
+		int index = 0;
+		float multi = 1.0f;
+		switch (input[i])
+		{
+		case '0':
+			index = 0;
+			break;
+		case '1':
+			index = 1;
+			break;
+		case '2':
+			index = 2;
+			break;
+		case '3':
+			index = 3;
+			break;
+		case '4':
+			index = 4;
+			break;
+		case '5':
+			index = 5;
+			break;
+		case '6':
+			index = 6;
+			break;
+		case '7':
+			index = 7;
+			break;
+		case '8':
+			index = 8;
+			break;
+		case '9':
+			index = 9;
+			break;
+		case 's':
+			index = 10;
+			skiping = false;
+			break;
+		case 'u':
+			index = 11;
+			multi = 3.5f;
+			skiping = false;
+			break;
+		case 'm':
+			index = 12;
+			multi = 1.2f;
+			skiping = false;
+			break;
+		default:
+			break;
+		}
+		if (skiping)
+			continue;
+		DrawSprite(
+			UI_font[index], 
+			translate(0, 0, 0), 
+			vec3(printX + UI_font_dist * UI_trans[trans][2] * multi, UI_trans[trans][1], 0),
+			vec3(UI_trans[trans][2], UI_trans[trans][2], 1),
+			0.0f,
+			colorAdd
+		);
+		printX += UI_font_dist * UI_trans[trans][2] * multi;
+	}
 }
 
 int main(int argc, char *argv[])

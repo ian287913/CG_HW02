@@ -6,7 +6,6 @@
 #include "SpriteObject.h"
 #include <vector>
 #include "GameState.h"
-#include "ParticleSystem.h"
 #include "TranslateRoteteScaleHelper.h"
 #include "WindowShader.h"
 

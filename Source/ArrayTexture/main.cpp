@@ -13,7 +13,7 @@ using namespace glm;
 using namespace std;
 
 #define UPDATE_CYCLE 33		//	(mini second)
-#define UINUM 7				//	UI number
+#define UINUM 11				//	UI number
 
 //uniform id
 struct
@@ -55,18 +55,25 @@ bool DEBUG_MODE = false;
 
 //  will
 GameState* myGameState;
+bool isGameOver = false;
+bool isWin = false;
 float camara_shape[2] = { 0, 0 };
-void CharacterButton(float x, float y);
+void UIButton(float x, float y);
 Sprite2D* UI_Button_chara_back;
 Sprite2D* UI_Button_chara_frame;
 Sprite2D* UI_Button_money;
 Sprite2D* UI_Button_laser;
+Sprite2D* UI_black;
+Sprite2D* UI_victory_title;
+Sprite2D* UI_defeat_title;
+Sprite2D* UI_Button_restart;
 Animation* UI_Button_chara[CHARNUM];
 const string character_names[CHARNUM] = {"L_Tank", "L_Ranger", "L_Tank", "L_Tank", "L_Tank"};
 const float character_scale[CHARNUM] = {1.8f, 2.16f, 1.8f, 1.8f, 1.8f};
 const float UI_Button_chara_size = 0.3f;
 const float UI_Button_money_size = 0.9f;
 const float UI_Button_laser_size = 0.3f;
+const float UI_Button_restart_size[] = { 2.0f, 0.6f };
 const float UI_trans[UINUM][3] = 
 { 
 	{-3.6f,		-3.6f,		1.8f},
@@ -74,8 +81,14 @@ const float UI_trans[UINUM][3] =
 	{0,			-3.6f,		1.8f},
 	{1.8f,		-3.6f,		1.8f},
 	{3.6f,		-3.6f,		1.8f},
+
 	{-9.0f,		-3.8f,		3.0f},
-	{9.0f,		-3.6f,		3.0f}
+	{9.0f,		-3.6f,		3.0f},
+
+	{	0,			0,		10.0f},	// black
+	{	0,			0,		3.0f},	// victory title
+	{	0,			0,		3.0f},	// defeat title
+	{0.0f,		-3.0f,		1.0f}	// restart button
 };
 //
 
@@ -146,6 +159,14 @@ void My_LoadTextures()
 	}
 	UI_Button_money = new Sprite2D();
 	UI_Button_money->Init(ImagePath + "Money_button.png", 1, 1, 24, false, 0, 0);
+	UI_black = new Sprite2D();
+	UI_black->Init(ImagePath + "black.png", 1, 1, 24, false, 0, 0);
+	UI_victory_title = new Sprite2D();
+	UI_victory_title->Init(ImagePath + "victory_title.png", 1, 1, 24, false, 0, 0);
+	UI_defeat_title = new Sprite2D();
+	UI_defeat_title->Init(ImagePath + "defeat_title.png", 1, 1, 24, false, 0, 0);
+	UI_Button_restart = new Sprite2D();
+	UI_Button_restart->Init(ImagePath + "restart_button.png", 1, 1, 24, false, 0, 0);
 	
 	//	Debug axis
 	DebugSprite = new Sprite2D();
@@ -283,9 +304,11 @@ void DrawSprite(Sprite2D* _sprite, glm::mat4 _parentMatrix, const vec3& _positio
 
 void ResetGameState()
 {
+	isGameOver = false;
 	delete myGameState;
 	myGameState = NULL;
 	myGameState = new GameState();
+	cout << "Reset Game" << endl;
 }
 
 // GLUT callback. Called to draw the scene.
@@ -376,12 +399,41 @@ void My_Display()
 	}
 	for (int i = 0; i < CHARNUM; i++)
 	{
-		DrawAnimation(UI_Button_chara[i], translate(UI_trans[i][0], UI_trans[i][1] - UI_Button_chara_size, 0) * scale(-character_scale[i], character_scale[i], 1) * UI_Button_chara[i]->anchorTranslate);
+		vec4 enable = (myGameState->CanAdd(i)) ? vec4(0, 0, 0, 0) : vec4(-0.5f, -0.5f, -0.4f, 0);
+		DrawAnimation(
+			UI_Button_chara[i], 
+			translate(UI_trans[i][0], UI_trans[i][1] - UI_Button_chara_size, 0) 
+			* scale(-character_scale[i], character_scale[i], 1) 
+			* UI_Button_chara[i]->anchorTranslate,
+			0.0f,
+			enable
+		);
 	}
 
 	// draw money lv up button UI
-	DrawSprite(UI_Button_money, translate(0, 0, 0), vec3(UI_trans[5][0], UI_trans[5][1], 0), vec3(UI_trans[5][2], UI_trans[5][2], 1));
+	{
+		vec4 enable = (myGameState->CanLevelUp())? vec4(0,0,0,0) : vec4(-0.5f, -0.5f, -0.4f, 0);
+		DrawSprite(UI_Button_money, translate(0, 0, 0), 
+			vec3(UI_trans[5][0], UI_trans[5][1], 0), 
+			vec3(UI_trans[5][2], UI_trans[5][2], 1),
+			0.0f, enable
+		);
+	}
 	// darw laser button UI
+
+	if (isGameOver)
+	{
+		DrawSprite(UI_black, translate(0, 0, 0), vec3(UI_trans[7][0], UI_trans[7][1], 0), vec3(UI_trans[7][2], UI_trans[7][2], 1));
+		if (isWin)
+		{
+			DrawSprite(UI_victory_title, translate(0, 0, 0), vec3(UI_trans[8][0], UI_trans[8][1], 0), vec3(UI_trans[8][2], UI_trans[8][2], 1));
+		}
+		else
+		{
+			DrawSprite(UI_defeat_title, translate(0, 0, 0), vec3(UI_trans[9][0], UI_trans[9][1], 0), vec3(UI_trans[9][2], UI_trans[9][2], 1));
+		}
+		DrawSprite(UI_Button_restart, translate(0, 0, 0), vec3(UI_trans[10][0], UI_trans[10][1], 0), vec3(UI_trans[10][2], UI_trans[10][2], 1));
+	}
 
 	if (DEBUG_MODE)
 	{
@@ -445,7 +497,7 @@ void My_Mouse(int button, int state, int x, int y)
 	{
 		if (state == GLUT_DOWN)
 		{
-			CharacterButton(x, y);
+			UIButton(x, y);
 			// printf("Mouse %d is released at (%d, %d)\n", button, x, y);
 		}
 		/*else if (state == GLUT_UP)
@@ -559,7 +611,6 @@ void My_Keyboard(unsigned char key, int x, int y)
 		break;
 	case 'r':
 		ResetGameState();
-		cout << "Reset Game" << endl;
 		break;
 	case 'l':
 		myGameState->Laser();
@@ -583,46 +634,76 @@ void My_Mouse_Moving(int x, int y) {
 	m_camera.mouseMoveEvent(x, y);
 }
 
-void CharacterButton(float x, float y)
+void UIButton(float x, float y)
 {
 	// define mvp transform matrix
 	mat4 modelToCam = m_camera.GetProjectionMatrix(aspect) * m_camera.GetViewMatrix() * m_camera.GetModelMatrix()
 		* translate(0, 0, 0);
-	float range = ((modelToCam * vec4(UI_Button_chara_size, 0, 0, 1)).x / 2) * camara_shape[0] * 1.5f;
-	float range_money = ((modelToCam * vec4(UI_Button_money_size, 0, 0, 1)).x / 2) * camara_shape[0] * 1.5f;
 	
-	// character button
-	for (int i = 0; i < CHARNUM; i++)
+	if (!isGameOver)
 	{
-		vec4 camPos = modelToCam * vec4(UI_trans[i][0], UI_trans[i][1], 0, 1);
-		float UI_pos[2] = 
+		float range = ((modelToCam * vec4(UI_Button_chara_size, 0, 0, 1)).x / 2) * camara_shape[0] * 1.5f;
+		float range_money = ((modelToCam * vec4(UI_Button_money_size, 0, 0, 1)).x / 2) * camara_shape[0] * 1.5f;
+		// character button
+		for (int i = 0; i < CHARNUM; i++)
 		{
-			(camPos.x/2 + 0.5f) * camara_shape[0],
-			(-camPos.y/2 + 0.5f) * camara_shape[1]
-		};
-		if (sqrtf(pow(x - UI_pos[0], 2) + pow(y - UI_pos[1], 2)) < range)
+			vec4 camPos = modelToCam * vec4(UI_trans[i][0], UI_trans[i][1], 0, 1);
+			float UI_pos[2] =
+			{
+				(camPos.x / 2 + 0.5f) * camara_shape[0],
+				(-camPos.y / 2 + 0.5f) * camara_shape[1]
+			};
+			if (sqrtf(pow(x - UI_pos[0], 2) + pow(y - UI_pos[1], 2)) < range)
+			{
+				// cout << "press character button " << i << endl;
+				myGameState->AddBattler(i, false);
+				return;
+			}
+		}
+
+		// money button
 		{
-			// cout << "press character button " << i << endl;
-			myGameState->AddBattler(character_names[i], false);
-			return;
+			vec4 camPos = modelToCam * vec4(UI_trans[5][0], UI_trans[5][1], 0, 1);
+			float UI_pos[2] =
+			{
+				(camPos.x / 2 + 0.5f) * camara_shape[0],
+				(-camPos.y / 2 + 0.5f) * camara_shape[1]
+			};
+			if (sqrtf(pow(x - UI_pos[0], 2) + pow(y - UI_pos[1], 2)) < range_money)
+			{
+				myGameState->LevelUp();
+				return;
+			}
 		}
 	}
-	
-	// money button
+	else
 	{
-		vec4 camPos = modelToCam * vec4(UI_trans[5][0], UI_trans[5][1], 0, 1);
+		// game over UI
+		float restart_size[2] = 
+		{
+			((modelToCam * vec4(UI_Button_restart_size[0], 0, 0, 1)).x / 2) * camara_shape[0] * 1.5f,
+			((modelToCam * vec4(UI_Button_restart_size[1], 0, 0, 1)).x / 2) * camara_shape[0] * 1.5f
+		};
+		vec4 camPos = modelToCam * vec4(UI_trans[10][0], UI_trans[10][1], 0, 1);
 		float UI_pos[2] =
 		{
 			(camPos.x / 2 + 0.5f) * camara_shape[0],
 			(-camPos.y / 2 + 0.5f) * camara_shape[1]
 		};
-		if (sqrtf(pow(x - UI_pos[0], 2) + pow(y - UI_pos[1], 2)) < range_money)
+		if ((abs(x - UI_pos[0]) < restart_size[0] / 2) && (abs(y - UI_pos[1]) < restart_size[1] / 2))
 		{
-			myGameState->LevelUp();
+			// restart
+			ResetGameState();
 			return;
 		}
 	}
 
+}
+void GameOverTitle(bool win)
+{
+	cout << "Game: Calls game over title: " << (win? "victory" : "defeat") << endl;
+	isGameOver = true;
+	isWin = win;
 }
 
 int main(int argc, char *argv[])

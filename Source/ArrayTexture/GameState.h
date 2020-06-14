@@ -6,6 +6,8 @@
 #define ENMYNUM 3
 #define LVLNUM 5
 
+void GameOverTitle(bool win);
+
 struct CharacterConfig
 {
 	string name;
@@ -57,7 +59,11 @@ public:
 	Tower* rightTower;
 	bool GameOver;
 	bool enableEnemyAI;
+	float spawnCDing[CHARNUM];
+	float laserCDing;
 
+	bool CanLevelUp();
+	bool CanAdd(int index);
 	void AddMoney(int amount);
 	// ¶}¹p®g¯¥
 	void Laser();
@@ -71,8 +77,6 @@ public:
 	GameState();
 	~GameState();
 protected:
-	float spawnCDing[CHARNUM];
-	float laserCDing;
 	float AICDing;
 	float laserTimer;
 	vector<BattleObject*> laseredObjects;
@@ -106,6 +110,16 @@ const float GameState::laserSpeed = 10;
 const int GameState::enemySellectWeight[ENMYNUM] = {3, 1, 0};
 
 // .cpp
+
+bool GameState::CanLevelUp()
+{
+	return ((currentLevel < LVLNUM - 1) && (currentMoney >= lvUP_cost[currentLevel]));
+}
+
+bool GameState::CanAdd(int index)
+{
+	return ((currentMoney >= cost[index]) && (spawnCDing[index] <= 0));
+}
 
 void GameState::AddMoney(int amount)
 {
@@ -269,6 +283,7 @@ void GameState::Update(float deltaTime)
 			cout << "----------------Player Wins!!----------------" << endl;
 			KillAll(true);
 			GameOver = true;
+			GameOverTitle(true);
 		}
 		else if(rightTower->hp <= 0)
 		{
@@ -276,6 +291,7 @@ void GameState::Update(float deltaTime)
 			cout << "----------------AI Wins!!----------------" << endl;
 			KillAll(false);
 			GameOver = true;
+			GameOverTitle(false);
 		}
 	}
 

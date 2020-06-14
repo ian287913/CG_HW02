@@ -34,7 +34,7 @@ public:
 	static void InitShaderSystem(std::string shaderPath);
 	static void InitSpriteTable(std::string spritePath);
 	static void UpdateInstances(float deltaTime);
-	static void RenderInstances(ViewManager m_camera, float aspect);
+	static void RenderInstances(ViewManager m_camera, float aspect, bool ui = false);
 	/*	parameters:
 									( _position,
 		_amount, _spriteName, _directionLH, _speedLH,
@@ -43,7 +43,7 @@ public:
 	*/
 	static void CreateInstance(glm::vec3 _position,
 		int _amount, std::string _spriteName, glm::vec2 _directionLH, glm::vec2 _speedLH, glm::vec2 _spawnRadiusLH,
-		float _fadeRadius, float _fadeDistance, glm::vec2 _rotationLH, glm::vec2 _scaleLH, float _lifetime, float _timeSpeed);
+		float _fadeRadius, float _fadeDistance, glm::vec2 _rotationLH, glm::vec2 _scaleLH, float _lifetime, float _timeSpeed, bool ui = false);
 	static void CreateInstance(std::string spriteName, float _lifeTime, int _amount, float _spawnRadius_Max, float _spawnRadius_Min,
 		float _speed, float _fadeRadius, float _fadeDistance);
 
@@ -90,13 +90,17 @@ private:
 	float speed = 0;
 	float fadeRadius = 3.0f;	//	start to fade out after this radius
 	float fadeDistance = 2.0f;	//	the distance that alpha: 1 -> 0
+	bool isUiLayer = false;
 };
 std::vector<ParticleSystem> ParticleSystem::particleInstances;
 std::vector<ParticleSystem::ParticleSprite> ParticleSystem::ParticleSpriteTable
 {
 	{	"Hit",		"particle_hit.png",		NULL},
 	{	"Charge",	"particle_charge_b.png",	NULL},
-	{	"Fire",		"particle_fire.png",	NULL}
+	{	"ChargeI",	"particle_charge_i.png",	NULL},
+	{	"Fire",		"particle_fire.png",	NULL},
+	{	"Ray",		"particle_ray.png",	NULL},
+	{	"RayP",		"particle_ray_pure.png",	NULL},
 };
 GLuint ParticleSystem::program;
 GLuint ParticleSystem::vao;
@@ -192,11 +196,12 @@ void ParticleSystem::InitSpriteTable(std::string spritePath)
 	}
 	cout << "SpriteTable initiated.\n";
 }
-void ParticleSystem::RenderInstances(ViewManager m_camera, float aspect)
+void ParticleSystem::RenderInstances(ViewManager m_camera, float aspect, bool ui)
 {
 	for each (ParticleSystem particle in particleInstances)
 	{
-		particle.Render(m_camera, aspect);
+		if (particle.isUiLayer == ui)
+			particle.Render(m_camera, aspect);
 	}
 }
 void ParticleSystem::UpdateInstances(float deltaTime)
@@ -216,7 +221,7 @@ void ParticleSystem::CreateInstance(glm::vec3 _position,
 	int _amount, std::string _spriteName, 
 	glm::vec2 _directionLH, glm::vec2 _speedLH, glm::vec2 _spawnRadiusLH,
 	float _fadeRadius, float _fadeDistance, 
-	glm::vec2 _rotationLH, glm::vec2 _scaleLH, float _lifetime, float _timeSpeed)
+	glm::vec2 _rotationLH, glm::vec2 _scaleLH, float _lifetime, float _timeSpeed, bool ui)
 {
 	ParticleSystem newParticle(_spriteName);
 
@@ -229,6 +234,8 @@ void ParticleSystem::CreateInstance(glm::vec3 _position,
 	newParticle.speed = _timeSpeed;
 	newParticle.fadeRadius = _fadeRadius;
 	newParticle.fadeDistance = _fadeDistance;
+
+	newParticle.isUiLayer = ui;
 
 	for (int i = 0; i < newParticle.amount; i++)
 	{

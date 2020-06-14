@@ -358,7 +358,11 @@ void My_Display()
 	if (DEBUG_MODE)
 	{
 		mat4 parentMatrix = animations[CharacterIndex]->anchorTranslate;
-		DrawAnimation(animations[CharacterIndex], parentMatrix);
+		///DrawAnimation(animations[CharacterIndex], parentMatrix);
+		///	fire
+		///DrawAnimation(animations[CharacterIndex], parentMatrix, 0, vec4(0.4, 0.2f, -0.4f, 0));
+		///	laser
+		DrawAnimation(animations[CharacterIndex], parentMatrix, 0, vec4(0.4, 0.2f, 0.1f, 0));
 	}
 
 	if (myGameState != NULL)
@@ -448,7 +452,7 @@ void My_Display()
 	{
 		//	Debug axis
 		DrawSprite(DebugSprite, translate(0, 0, 0), vec3(0, 0, 0), vec3(4, 4, 1));
-		DrawSprite(DebugSprite, translate(1, 1, 0), vec3(0, 0, 0), vec3(4, 4, 1));
+		///DrawSprite(DebugSprite, translate(1, 1, 0), vec3(0, 0, 0), vec3(4, 4, 1));
 	}
 
 	
@@ -554,9 +558,9 @@ void My_Keyboard(unsigned char key, int x, int y)
 		//WindowShader::grayScale += 0.2f;
 
 		//	simulate a laser FX:
-		WindowShader::AddFxTask({ 0.0f, "ColorScale", 0.7f, 0.15f });
-		WindowShader::AddFxTask({ 1500.0f, "ColorScale", 4.0f, 0.1f });
-		WindowShader::AddFxTask({ 2000.0f, "ColorScale", 1.0f, 0.03f});
+		///WindowShader::AddFxTask({ 0.0f, "ColorScale", 0.7f, 0.15f });
+		///WindowShader::AddFxTask({ 1500.0f, "ColorScale", 4.0f, 0.1f });
+		///WindowShader::AddFxTask({ 2000.0f, "ColorScale", 1.0f, 0.03f});
 
 
 		debug_x += 0.05f;

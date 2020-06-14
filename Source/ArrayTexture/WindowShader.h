@@ -30,8 +30,10 @@ public:
 	{
 		GLint  grayScale;
 		GLint  colorOffset;
+		GLint  colorScale;
 	} uniforms;
 	static float grayScale;
+	static float colorScale;
 	static glm::vec4 colorOffset;
 };
 const GLfloat WindowShader::window_positions[] =
@@ -45,6 +47,7 @@ const GLfloat WindowShader::window_positions[] =
 //	uniforms
 struct WindowShader::Uniforms WindowShader::uniforms;
 float WindowShader::grayScale = 0;
+float WindowShader::colorScale = 1;
 glm::vec4 WindowShader::colorOffset = glm::vec4(0, 0, 0, 0);
 
 GLuint WindowShader::program;
@@ -78,7 +81,8 @@ void WindowShader::InitShaderProgram(std::string shaderPath)
 	///
 
 	//	attribute
-	uniforms.grayScale = glGetUniformLocation(program, "grayScale");
+	uniforms.grayScale = glGetUniformLocation(program, "u_grayScale");
+	uniforms.colorScale = glGetUniformLocation(program, "u_colorScale");
 	///uniforms.colorOffset = glGetUniformLocation(program, "u_color");
 
 	/*fxRadiusID = glGetUniformLocation(windowProgram, "fxRadius");
@@ -117,6 +121,7 @@ void WindowShader::Render()
 	glBindVertexArray(vao);
 	glUseProgram(program);
 	glUniform1f(uniforms.grayScale, grayScale);
+	glUniform1f(uniforms.colorScale, colorScale);
 	///glUniform4f(uniforms.colorOffset, 0, 0, 0, 0);
 
 	glDrawArrays(GL_TRIANGLE_FAN, 0, 4);

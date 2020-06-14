@@ -3,14 +3,16 @@
 layout(location = 0) in vec2 position;
 layout(location = 1) in vec2 texcoord;
 //uniform vec4 u_color;
-uniform float grayScale;
+uniform float u_grayScale;
+uniform float u_colorScale;
 
 out VS_OUT
 {
 	vec2 texcoord;
 } vs_out;
 //out vec4 offsetColor;
-out float gray;
+out float grayScale;
+out float colorScale;
 
 void main(void)
 {
@@ -20,5 +22,7 @@ void main(void)
 	//	offset color
 	//offsetColor = u_color;
 	//	gray
-	gray = grayScale;
+	grayScale = u_grayScale;
+	//	color scale
+	colorScale = u_colorScale;
 }

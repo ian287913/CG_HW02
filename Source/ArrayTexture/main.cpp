@@ -293,7 +293,7 @@ void My_Display()
 {
 	WindowShader::BindFrameBuffer();
 
-	glClearColor(0.5f, 0.5f, 0.5f, 0.0f);
+	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	////////////////	Draw background		//////////////////////////////////////////////
@@ -476,11 +476,14 @@ void My_Keyboard(unsigned char key, int x, int y)
 			_spawnRadiusLH,	_fadeRadius, _fadeDistance,
 			_rotationLH, _scaleLH, _lifetime, _timeSpeed)
 		*/
+		WindowShader::colorScale += 0.2f;
 
 		debug_y += 0.2f;
 		cout << "debug_y = " << debug_y << "\n";
 		break;
 	case 's':
+		WindowShader::colorScale -= 0.2f;
+
 		debug_y -= 0.2f;
 		cout << "debug_y = " << debug_y << "\n";
 		break;

@@ -65,11 +65,11 @@ const float character_scale[CHARNUM] = {1.8f, 2.16f, 1.8f, 1.8f, 1.8f};
 const float UI_Button_chara_size = 0.3f;
 const float UI_trans[UINUM][4] = 
 { 
-	{-3.6f,	-3.8f,		1.8f},
-	{-1.8f, -3.8f,		1.8f},
-	{0,		-3.8f,		1.8f},
-	{1.8f,	-3.8f,		1.8f},
-	{3.6f,	-3.8f,		1.8f}
+	{-3.6f,	-3.6f,		1.8f},
+	{-1.8f, -3.6f,		1.8f},
+	{0,		-3.6f,		1.8f},
+	{1.8f,	-3.6f,		1.8f},
+	{3.6f,	-3.6f,		1.8f}
 };
 //
 
@@ -556,11 +556,12 @@ void CharacterButton(float x, float y)
 		float UI_pos[2] = 
 		{
 			(camPos.x/2 + 0.5f) * camara_shape[0],
-			(-camPos.y + 1.0f) * camara_shape[1] / 2
+			(-camPos.y/2 + 0.5f) * camara_shape[1]
 		};
 		if (sqrtf(pow(x - UI_pos[0], 2) + pow(y - UI_pos[1], 2)) < range)
 		{
-			cout << "press character button " << i << endl;
+			// cout << "press character button " << i << endl;
+			myGameState->AddBattler(character_names[i], false);
 			break;
 		}
 	}

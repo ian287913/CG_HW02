@@ -31,9 +31,9 @@ vec2 RotateV2(vec2 v2, float radius)
 
 void main()
 {
-	vec2 distance = offset + (direction * time * speed);
+	vec2 distance = direction * time * speed;
 
-	gl_Position = um4p * um4mv * vec4((RotateV2(points[gl_VertexID], rotation) * scaling) + distance, 0.0, 1.0);
+	gl_Position = um4p * um4mv * vec4((RotateV2(points[gl_VertexID], rotation) * scaling) + offset + distance, 0.0, 1.0);
 	vertexData.texcoord = uv[gl_VertexID];
 	vertexData.spriteIndex = spriteIndex;
 

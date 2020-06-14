@@ -21,8 +21,8 @@ const vector<CharacterConfig> characterTable
 	{"L_Minion", {10, 0.6f, 50, 50, false, {150, 20, 1.0f, 1.2f, "L_Minion", 0, 0, 0, 1, true, 1.5f}}},
 	{"L_Tank", {10, 0.8f, 100, 100, false, {1000, 30, 1.3f, 1.5f, "L_Tank", 0, 0, 0, 1, true, 1.5f}}},
 	{"L_Ranger", {15, 2.0f, 40, 70, false, {300, 60, 1.0f, 4.0f, "L_Ranger", 0, 0, 0, 1, true, 1.5f}}},
-	{"L_Lancer", {10, 1.0f, 60, 70, false, {500, 40, 1.0f, 1.5f, "L_Lancer", 0, 0, 0, 1, true, 1.5f}}},
-	{"L_Super", {15, 2.2f, 150, 50, true, {1500, 80, 1.3f, 1.5f, "L_Super", 0, 0, 0, 1, true, 1.5f}}}
+	{"L_Lancer", {10, 1.0f, 100, 70, false, {500, 40, 1.0f, 1.5f, "L_Lancer", 0, 0, 0, 1, true, 1.5f}}},
+	{"L_Super", {15, 2.2f, 300, 50, true, {1500, 80, 1.3f, 1.5f, "L_Super", 0, 0, 0, 1, true, 1.5f}}}
 };
 
 // 左方AI使用的角色

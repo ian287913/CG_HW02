@@ -145,18 +145,20 @@ void GameState::Laser()
 }
 void GameState::LaserAttack()
 {
+	vector<BattleObject*> addLaser = vector<BattleObject*>();
 	for (int i = BattleObject::allObjects.size() - 1; i >= 0; i--)
 	{
-		int cur_id = BattleObject::allObjects[i]->id_bo;
-		if (BattleObject::allObjects[i]->facing > 0 && (cur_id != leftTower->id_bo))
+		if (BattleObject::allObjects[i]->facing > 0 && (BattleObject::allObjects[i]->id_bo != leftTower->id_bo))
 		{
 			if (BattleObject::allObjects[i]->position < rightSpawnPos - laseringRange)
 				continue;
 
 			bool inLasered = false;
-			for (int j = 0; j < laseredObjects.size(); j++)
+			for (int j = laseredObjects.size() - 1; j >= 0; j--)
 			{
-				if (laseredObjects[j]->id_bo == cur_id)
+				if (laseredObjects[j] == NULL)
+					continue;
+				if (laseredObjects[j]->id_bo == BattleObject::allObjects[i]->id_bo)
 				{
 					inLasered = true;
 					break;
@@ -164,10 +166,14 @@ void GameState::LaserAttack()
 			}
 			if (!inLasered)
 			{
-				BattleObject::allObjects[i]->Damage(towerAttack);
-				laseredObjects.push_back(BattleObject::allObjects[i]);
+				addLaser.push_back(BattleObject::allObjects[i]);
 			}
 		}
+	}
+	for (int i = 0; i < addLaser.size(); i++)
+	{
+		laseredObjects.push_back(addLaser[i]);
+		addLaser[i]->Damage(towerAttack);
 	}
 }
 

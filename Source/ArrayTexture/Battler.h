@@ -249,6 +249,7 @@ BattleObject* Battler::FindTarget()
 void Battler::Die()
 {
 	allObjects.erase(allObjects.begin() + this->id_bo);
+	this->id_bo = -1;
 	for (int i = allObjects.size() - 1; i >= 0; i--)
 	{
 		allObjects[i]->id_bo = i;

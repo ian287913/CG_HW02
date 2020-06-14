@@ -13,6 +13,7 @@ struct BattlerConfig
 	float attackDelay;
 	float KBHP;
 	int lootMoney;
+	bool attackAll;
 	BOConfig bof;
 };
 
@@ -24,6 +25,7 @@ public:
 	float speed;
 	float attackDelay;
 	int lootMoney;
+	bool attackAll;
 
 	Battler(BattlerConfig config);
 	~Battler();
@@ -39,6 +41,7 @@ protected:
 	void AI(float deltaTime);
 	BattleObject* FindTarget();
 	void Die() override;
+	void AttackALL();
 };
 
 ////////////////////	.cpp
@@ -55,6 +58,7 @@ Battler::Battler(BattlerConfig config): BattleObject(config.bof)
 	this->attackTimer = 0;
 	this->originalHeight = config.bof.height;
 	this->lootMoney = config.lootMoney;
+	this->attackAll = config.attackAll;
 }
 Battler::~Battler()
 {
@@ -149,7 +153,10 @@ void Battler::AI(float deltaTime)
 		{
 			if (this->attackTimer <= 0)
 			{
-				this->Attack(target);
+				if (this->attackAll)
+					this->AttackALL();
+				else
+					this->Attack(target);
 				// cout << "Battler " << this->id << ": state idle" << endl;
 				this->state = BattlerState::idle;
 				this->CDTimer = this->attackCD;
@@ -223,6 +230,22 @@ void Battler::AI(float deltaTime)
 	break;
 	default:
 		break;
+	}
+}
+
+void Battler::AttackALL()
+{
+	for (int i = allObjects.size() - 1; i >= 0; i--)
+	{
+		// 特別不檢查每個人的hp是否為0, 因為tower hp為0 還是照打
+		if (this->facing * allObjects[i]->GameObject::facing >= 0)
+			continue;
+		float dist = abs(allObjects[i]->GameObject::position - this->position);
+		// cout << "finding... dist: " << dist << endl;
+		if (dist < this->attackRange)
+		{
+			this->Attack(allObjects[i]);
+		}
 	}
 }
 

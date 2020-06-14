@@ -35,20 +35,11 @@ public:
 	static void InitSpriteTable(std::string spritePath);
 	static void UpdateInstances(float deltaTime);
 	static void RenderInstances(ViewManager m_camera, float aspect);
-	/*
-		amount *
-		name *
-
-		direction	min, max		by radius
-		speed:		min, max		if speed < 0, do middle
-
-		spawnRadius = 0, 0
-		fadeRadius, fadeDistance = 1.0
-
-		rotation:	min, max = 0, 6.28
-		scale:		min, max
-		lifetime = 3
-		timeSpeed = 1
+	/*	parameters:
+									( _position,
+		_amount, _spriteName, _directionLH, _speedLH,
+		_spawnRadiusLH,	_fadeRadius, _fadeDistance,
+		_rotationLH, _scaleLH, _lifetime, _timeSpeed)
 	*/
 	static void CreateInstance(glm::vec3 _position,
 		int _amount, std::string _spriteName, glm::vec2 _directionLH, glm::vec2 _speedLH, glm::vec2 _spawnRadiusLH,

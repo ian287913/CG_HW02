@@ -429,6 +429,8 @@ void My_Timer(int val)
 	{
 		UI_Button_chara[i]->Elapse(((float)UPDATE_CYCLE) * updateSpeed);
 	}
+	//	Scene FX
+	WindowShader::UpdateFxTasks(((float)UPDATE_CYCLE) * updateSpeed);
 
 	glutPostRedisplay();
 	glutTimerFunc(UPDATE_CYCLE, My_Timer, val);
@@ -488,12 +490,20 @@ void My_Keyboard(unsigned char key, int x, int y)
 		cout << "debug_y = " << debug_y << "\n";
 		break;
 	case 'd':
-		WindowShader::grayScale += 0.2f;
+		//WindowShader::grayScale += 0.2f;
+
+		//	simulate a laser FX:
+		WindowShader::AddFxTask({ 0.0f, "ColorScale", 0.7f, 0.15f });
+		WindowShader::AddFxTask({ 1500.0f, "ColorScale", 4.0f, 0.1f });
+		WindowShader::AddFxTask({ 2000.0f, "ColorScale", 1.0f, 0.03f});
+
+
 		debug_x += 0.05f;
 		cout << "debug_x = " << debug_x << "\n";
 		break;
 	case 'a':
-		WindowShader::grayScale -= 0.2f;
+		//WindowShader::grayScale -= 0.2f;
+
 		debug_x -= 0.05f;
 		cout << "debug_x = " << debug_x << "\n";
 		break;

@@ -9,6 +9,13 @@
 #include "Sprite2D.h"
 #include "SpriteObject.h"
 
+struct FxTask {
+	float waitingTime;
+	std::string FxType;	//	"GrayScale", "ColorScale"
+	float targetValue;
+	float lerpRatio;
+};
+
 class WindowShader
 {
 public:
@@ -16,6 +23,10 @@ public:
 	static void BindFrameBuffer();
 	static void Render();
 	static void ChangeSize(int w, int h);
+
+	//	Task functions
+	static void AddFxTask(FxTask task);
+	static void UpdateFxTasks(float deltaTime);
 
 	static GLuint program;
 	static GLuint vao;
@@ -35,6 +46,15 @@ public:
 	static float grayScale;
 	static float colorScale;
 	static glm::vec4 colorOffset;
+
+private:
+	//	FX queue
+	static std::vector<FxTask> FxTaskTable;
+	static float targetValue_GrayScale;
+	static float lerpRatio_GrayScale;
+	static float targetValue_ColorScale;
+	static float lerpRatio_ColorScale;
+
 };
 const GLfloat WindowShader::window_positions[] =
 {
@@ -49,13 +69,20 @@ struct WindowShader::Uniforms WindowShader::uniforms;
 float WindowShader::grayScale = 0;
 float WindowShader::colorScale = 1;
 glm::vec4 WindowShader::colorOffset = glm::vec4(0, 0, 0, 0);
-
+//	program & buffers
 GLuint WindowShader::program;
 GLuint WindowShader::vao;
 GLuint WindowShader::vbo;
 GLuint WindowShader::FBODataTexture;
 GLuint WindowShader::FBO;
 GLuint WindowShader::depthRBO;
+//	FX
+std::vector<FxTask> WindowShader::FxTaskTable;
+float WindowShader::targetValue_GrayScale = 0;
+float WindowShader::lerpRatio_GrayScale = 1;
+float WindowShader::targetValue_ColorScale = 1;
+float WindowShader::lerpRatio_ColorScale = 1;
+
 
 void WindowShader::InitShaderProgram(std::string shaderPath)
 {
@@ -150,3 +177,44 @@ void WindowShader::ChangeSize(int w, int h)
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, FBODataTexture, 0);
 }
 
+//	FX:
+void WindowShader::AddFxTask(FxTask task)
+{
+	//"GrayScale", "ColorScale"
+	if (task.FxType == "GrayScale" || task.FxType == "ColorScale")
+	{
+		FxTaskTable.push_back(task);
+	}
+	else
+	{
+		cout << "##\t Cannot specify task type: " << task.FxType << ".\n";
+	}
+}
+void WindowShader::UpdateFxTasks(float deltaTime)	//	mini second
+{
+	//	handle queue table
+	for (int i = FxTaskTable.size() - 1; i >= 0; i--)
+	{
+		FxTaskTable[i].waitingTime -= deltaTime;
+		if (FxTaskTable[i].waitingTime <= 0)
+		{
+			//	apply FX
+			if (FxTaskTable[i].FxType == "GrayScale")
+			{
+				targetValue_GrayScale = FxTaskTable[i].targetValue;
+				lerpRatio_GrayScale = FxTaskTable[i].lerpRatio;
+			}
+			else if (FxTaskTable[i].FxType == "ColorScale")
+			{
+				targetValue_ColorScale = FxTaskTable[i].targetValue;
+				lerpRatio_ColorScale = FxTaskTable[i].lerpRatio;
+			}
+
+			FxTaskTable.erase(FxTaskTable.begin() + i);
+		}
+	}
+
+	//	update values
+	grayScale = Lerp(grayScale, targetValue_GrayScale, lerpRatio_GrayScale);
+	colorScale = Lerp(colorScale, targetValue_ColorScale, lerpRatio_ColorScale);
+}

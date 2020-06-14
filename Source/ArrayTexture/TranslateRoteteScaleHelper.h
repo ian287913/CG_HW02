@@ -78,7 +78,10 @@ glm::vec2 RandomPointRadius(float minRadius, float maxRadius)
 	return RandomDirection(0, 3.14159f * 2.0f) * RandomFloat(minRadius, maxRadius);
 }
 
-
+float Lerp(float a, float b, float ratio)
+{
+	return ((a * (1.0f - ratio)) + (b * ratio));
+}
 
 
 

@@ -67,7 +67,7 @@ const float UI_font_dist = 0.5f;
 Sprite2D* UI_Button_chara_back;
 Sprite2D* UI_Button_chara_frame;
 Sprite2D* UI_Button_money;
-Sprite2D* UI_Button_laser;
+Animation* UI_Button_laser;
 Sprite2D* UI_black;
 Sprite2D* UI_victory_title;
 Sprite2D* UI_defeat_title;
@@ -175,6 +175,7 @@ void My_LoadTextures()
 	}
 	UI_Button_money = new Sprite2D();
 	UI_Button_money->Init(ImagePath + "Money_button.png", 1, 1, 24, false, 0, 0);
+	UI_Button_laser = new Animation("Icon_Ultimate");
 	UI_black = new Sprite2D();
 	UI_black->Init(ImagePath + "black.png", 1, 1, 24, false, 0, 0);
 	UI_victory_title = new Sprite2D();
@@ -453,6 +454,27 @@ void My_Display()
 			);
 		}
 		// darw laser button UI
+		{
+			bool isEnable = (myGameState->laserCDing <= 0);
+			vec4 enable = (isEnable) ? vec4(0, 0, 0, 0) : vec4(-0.5f, -0.5f, -0.4f, 0);
+			float gray = (isEnable) ? 0 : 1;
+			if (UI_Button_laser->currentSet->setName == "idle" && isEnable)
+			{
+				UI_Button_laser->SetCurrentSet("run");
+			}
+			else if (UI_Button_laser->currentSet->setName == "run" && !isEnable)
+			{
+				UI_Button_laser->SetCurrentSet("idle");
+			}
+			DrawAnimation(
+				UI_Button_laser,
+				translate(UI_trans[6][0], UI_trans[6][1], 0)
+				* scale(UI_trans[6][2], UI_trans[6][2], 1),
+				0.0f,
+				enable,
+				gray
+			);
+		}
 
 		// draw left hp
 		DrawFont(to_string(myGameState->leftTower->hp) + "s" + to_string(GameState::towerHP), 11);
@@ -551,6 +573,10 @@ void My_Timer(int val)
 	for (int i = 0; i < CHARNUM; i++)
 	{
 		UI_Button_chara[i]->Elapse(((float)UPDATE_CYCLE) * updateSpeed);
+	}
+	if (UI_Button_laser != NULL)
+	{
+		UI_Button_laser->Elapse(((float)UPDATE_CYCLE) * updateSpeed);
 	}
 	//	Scene FX
 	WindowShader::UpdateFxTasks(((float)UPDATE_CYCLE) * updateSpeed);
@@ -720,6 +746,7 @@ void UIButton(float x, float y)
 	{
 		float range = ((modelToCam * vec4(UI_Button_chara_size, 0, 0, 1)).x / 2) * camara_shape[0] * 1.5f;
 		float range_money = ((modelToCam * vec4(UI_Button_money_size, 0, 0, 1)).x / 2) * camara_shape[0] * 1.5f;
+		float range_laser = ((modelToCam * vec4(UI_Button_laser_size, 0, 0, 1)).x / 2) * camara_shape[0] * 1.5f;
 		// character button
 		for (int i = 0; i < CHARNUM; i++)
 		{
@@ -748,6 +775,21 @@ void UIButton(float x, float y)
 			if (sqrtf(pow(x - UI_pos[0], 2) + pow(y - UI_pos[1], 2)) < range_money)
 			{
 				myGameState->LevelUp();
+				return;
+			}
+		}
+
+		// laser button
+		{
+			vec4 camPos = modelToCam * vec4(UI_trans[6][0], UI_trans[6][1], 0, 1);
+			float UI_pos[2] =
+			{
+				(camPos.x / 2 + 0.5f) * camara_shape[0],
+				(-camPos.y / 2 + 0.5f) * camara_shape[1]
+			};
+			if (sqrtf(pow(x - UI_pos[0], 2) + pow(y - UI_pos[1], 2)) < range_laser)
+			{
+				myGameState->Laser();
 				return;
 			}
 		}

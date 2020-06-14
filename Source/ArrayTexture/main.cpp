@@ -419,7 +419,7 @@ void My_Mouse(int button, int state, int x, int y)
 		if (state == GLUT_DOWN)
 		{
 			CharacterButton(x, y);
-			printf("Mouse %d is released at (%d, %d)\n", button, x, y);
+			// printf("Mouse %d is released at (%d, %d)\n", button, x, y);
 		}
 		/*else if (state == GLUT_UP)
 		{
@@ -545,19 +545,20 @@ void My_Mouse_Moving(int x, int y) {
 
 void CharacterButton(float x, float y)
 {
-	cout << "camShape: " << camara_shape[0] << ", " << camara_shape[1] << endl;
+	// cout << "camShape: " << camara_shape[0] << ", " << camara_shape[1] << endl;
+	mat4 modelToCam = m_camera.GetProjectionMatrix(aspect) * m_camera.GetViewMatrix() * m_camera.GetModelMatrix()
+		* translate(0, 0, 0);
+	float range = ((modelToCam * vec4(UI_Button_chara_size, 0, 0, 1)).x / 2) * camara_shape[0] * 1.5f;
+	// cout << "range: " << range << endl;
 	for (int i = 0; i < CHARNUM; i++)
 	{
-		mat4 modelToCam = m_camera.GetProjectionMatrix(aspect) * m_camera.GetViewMatrix() * m_camera.GetModelMatrix()
-			* translate(0, 0, 0);
 		vec4 camPos = modelToCam * vec4(UI_trans[i][0], UI_trans[i][1], 0, 1);
 		float UI_pos[2] = 
 		{
 			(camPos.x/2 + 0.5f) * camara_shape[0],
 			(-camPos.y + 1.0f) * camara_shape[1] / 2
 		};
-		// cout << "camPos: " << UI_pos[0] << ", " << UI_pos[1] << endl;
-		if (sqrtf(pow(x - UI_pos[0], 2) + pow(y - UI_pos[1], 2)) < UI_Button_chara_size * 200.0f)
+		if (sqrtf(pow(x - UI_pos[0], 2) + pow(y - UI_pos[1], 2)) < range)
 		{
 			cout << "press character button " << i << endl;
 			break;

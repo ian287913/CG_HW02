@@ -6,6 +6,8 @@
 #define ENMYNUM 3
 #define LVLNUM 5
 
+void GameOverTitle(bool win);
+
 struct CharacterConfig
 {
 	string name;
@@ -269,6 +271,7 @@ void GameState::Update(float deltaTime)
 			cout << "----------------Player Wins!!----------------" << endl;
 			KillAll(true);
 			GameOver = true;
+			GameOverTitle(true);
 		}
 		else if(rightTower->hp <= 0)
 		{
@@ -276,6 +279,7 @@ void GameState::Update(float deltaTime)
 			cout << "----------------AI Wins!!----------------" << endl;
 			KillAll(false);
 			GameOver = true;
+			GameOverTitle(false);
 		}
 	}
 

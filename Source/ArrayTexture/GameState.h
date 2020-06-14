@@ -18,8 +18,11 @@ struct CharacterConfig
 const vector<CharacterConfig> characterTable
 {
 	// name, speed, delay, kb, loot, hp, att, attCD, range, sprite, x, y, z, size, enemy, diedelay
-	{"L_Tank", {10, 0.8f, 50, 50, {250, 20, 1.0f, 1.5f, "L_Tank", 0, 0, 0, 2.5, true, 1.5f}}},
-	{"L_Ranger", {10, 2.0f, 50, 70, {250, 30, 1.0f, 4.0f, "L_Ranger", 0, 0, 0, 3.0f, true, 1.5f}}}
+	{"L_Minion", {10, 0.6f, 50, 50, {150, 20, 1.0f, 1.2f, "L_Minion", 0, 0, 0, 1, true, 1.5f}}},
+	{"L_Tank", {10, 0.8f, 50, 100, {1000, 30, 1.3f, 1.5f, "L_Tank", 0, 0, 0, 2.5, true, 1.5f}}},
+	{"L_Ranger", {10, 2.0f, 50, 70, {300, 60, 1.0f, 4.0f, "L_Ranger", 0, 0, 0, 3.0f, true, 1.5f}}},
+	{"L_Lancer", {10, 1.0f, 50, 70, {500, 40, 1.0f, 1.5f, "L_Lancer", 0, 0, 0, 1, true, 1.5f}}},
+	{"L_Tank", {10, 0.8f, 50, 50, {250, 20, 1.0f, 1.5f, "L_Tank", 0, 0, 0, 1, true, 1.5f}}}
 };
 
 // 左方AI使用的角色
@@ -97,7 +100,7 @@ const float GameState::laserCD = 20;
 const float GameState::laserDelay = 2.0f;
 const float GameState::AICD = 10;
 const float GameState::AICD_range = 2.5f;
-const int GameState::cost[CHARNUM] = {75, 150, 300, 600, 1000};
+const int GameState::cost[CHARNUM] = {75, 15, 30, 60, 100};
 const int GameState::maxMoney_level[LVLNUM] = {500, 1000, 1500, 2000, 2500};
 const int GameState::lvUP_cost[LVLNUM] = {250, 750, 1200, 1750, 3000};
 const int GameState::rateMoney_level[LVLNUM] = {50, 60, 75, 90, 110};

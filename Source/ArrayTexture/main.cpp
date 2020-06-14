@@ -819,7 +819,7 @@ void My_Keyboard(unsigned char key, int x, int y)
 		myGameState->AddBattler(1, true);
 		break;
 	case '8':
-		myGameState->AddBattler("L_Tank", false);
+		myGameState->AddBattler(2, true);
 		break;
 	case '9':
 		myGameState->AddBattler("L_Ranger", false);

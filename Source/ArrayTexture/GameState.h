@@ -26,9 +26,9 @@ const vector<CharacterConfig> characterTable
 const vector<CharacterConfig> characterTable_enemy
 {
 	// name, speed, delay, kb, loot, hp, att, attCD, range, sprite, x, y, z, size, enemy, diedelay
-	{"L_Tank", {10, 0.8f, 50, 50, {250, 20, 1.0f, 1.5f, "L_Tank", 0, 0, 0, 2.5, true, 1.5f}}},
-	{"L_Ranger", {10, 2.0f, 50, 70, {250, 30, 1.0f, 4.0f, "L_Ranger", 0, 0, 0, 3.0f, true, 1.5f}}},
-	{"L_Tank", {10, 0.8f, 50, 50, {250, 20, 1.0f, 1.5f, "L_Tank", 0, 0, 0, 2.5, true, 1.5f}}}
+	{"A_Minion", {10, 0.9f, 50, 50, {90, 15, 1.0f, 1.5f, "A_Minion", 0, 0, 0, 1, true, 1.5f}}},
+	{"A_Ranger", {15, 1.5f, 40, 70, {250, 40, 1.3f, 4.0f, "A_Ranger", 0, 0, 0, 1, true, 1.5f}}},
+	{"A_Shield", {10, 1.6f, 100, 100, {1000, 50, 1.7f, 1.5f, "A_Shield", 0, 0, 0, 1, true, 1.5f}}}
 };
 
 static class GameState
@@ -110,7 +110,7 @@ const float GameState::towerAttack = 1000;
 const float GameState::laserRange = 15;
 const float GameState::laserSpeed = 60;
 const float GameState::laserFireOffset = 1.2f;
-const int GameState::enemySellectWeight[ENMYNUM] = {3, 1, 0};
+const int GameState::enemySellectWeight[ENMYNUM] = {4, 1, 1};
 
 // .cpp
 
@@ -389,7 +389,7 @@ GameState::GameState()
 	// ³y¶ð (¥ª)
 	{
 		// HP, attack, attackCD, attackrange {string character; pos; height; dist; sizescale; facingRight; dieTime; }
-		BOConfig config = { towerHP, towerAttack, laserCD, 10, "L_Tower", leftSpawnPos, 0, spawnDistance, 5, true, 100 };
+		BOConfig config = { towerHP, towerAttack, laserCD, 10, "A_Tower", leftSpawnPos, 0, spawnDistance, 1, true, 100 };
 		leftTower = new Tower(config, true);
 	}
 	// ³y¶ð (¥k)

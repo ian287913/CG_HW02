@@ -99,7 +99,7 @@ protected:
 // 參數定義
 const float GameState::spawnCD[CHARNUM] = {2, 2, 2, 2.5f, 5.0f};
 const float GameState::laserCD = 20;
-const float GameState::laserDelay = 2.0f;
+const float GameState::laserDelay = 1.5f;
 const float GameState::AICD = 10;
 const float GameState::AICD_range = 2.5f;
 const int GameState::cost[CHARNUM] = {75, 150, 300, 600, 1000};
@@ -108,16 +108,17 @@ const int GameState::lvUP_cost[LVLNUM] = {250, 750, 1200, 1750, 3000};
 const int GameState::rateMoney_level[LVLNUM] = {50, 60, 75, 90, 110};
 const float GameState::leftSpawnPos = -7;
 const float GameState::rightSpawnPos = 7;
-const float GameState::spawnDistance = -4.5;
+const float GameState::spawnDistance = -4.4;
 const float GameState::spawnDistanceRange = 0.6f;
 const float GameState::towerHP = 1000;
 const float GameState::towerAttack = 1000;
 const float GameState::laserRange = 15;
 const float GameState::laserSpeed = 60;
 const float GameState::laserFireOffset = 1.2f;
-const int GameState::enemySellectWeight[ENMYNUM] = {4, 1, 1};
-const int GameState::enemySellectCD[ENMYNUM] = {5, 16, 23};
+const int GameState::enemySellectWeight[ENMYNUM] = {10, 2, 1};
+const int GameState::enemySellectCD[ENMYNUM] = {3.5, 16, 23};
 
+const float towerOffset = 0.4f;
 // .cpp
 
 bool GameState::CanLevelUp()
@@ -396,13 +397,13 @@ GameState::GameState()
 	// 造塔 (左)
 	{
 		// HP, attack, attackCD, attackrange {string character; pos; height; dist; sizescale; facingRight; dieTime; }
-		BOConfig config = { towerHP, towerAttack, laserCD, 10, "A_Tower", leftSpawnPos, 0, spawnDistance, 1, true, 100 };
+		BOConfig config = { towerHP, towerAttack, laserCD, 10, "A_Tower", leftSpawnPos - towerOffset, 0, spawnDistance, 1, true, 100 };
 		leftTower = new Tower(config, true);
 	}
 	// 造塔 (右)
 	{
 		// HP, attack, attackCD, attackrange {string character; pos; height; dist; sizescale; facingRight; dieTime; }
-		BOConfig config = { towerHP, towerAttack, laserCD, 10, "L_Tower", rightSpawnPos, 0, spawnDistance, 1, false, 100 };
+		BOConfig config = { towerHP, towerAttack, laserCD, 10, "L_Tower", rightSpawnPos + towerOffset, 0, spawnDistance, 1, false, 100 };
 		rightTower = new Tower(config, false);
 	}
 	constructed = true;

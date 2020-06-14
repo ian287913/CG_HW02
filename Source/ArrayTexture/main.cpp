@@ -87,8 +87,8 @@ Sprite2D* UI_victory_title;
 Sprite2D* UI_defeat_title;
 Sprite2D* UI_Button_restart;
 Animation* UI_Button_chara[CHARNUM];
-const string character_names[CHARNUM] = {"L_Tank", "L_Ranger", "L_Tank", "L_Tank", "L_Tank"};
-const float character_scale[CHARNUM] = {1.8f, 2.16f, 1.8f, 1.8f, 1.8f};
+const string character_names[CHARNUM] = {"L_Minion", "L_Tank", "L_Ranger", "L_Lancer", "L_Tank"};
+const float character_scale[CHARNUM] = {1, 1.8f, 2.16f, 0.8f, 1};
 const float UI_Button_chara_size = 0.3f;
 const float UI_Button_money_size = 0.9f;
 const float UI_Button_laser_size = 0.3f;
@@ -819,7 +819,7 @@ void My_Keyboard(unsigned char key, int x, int y)
 		myGameState->AddBattler(1, true);
 		break;
 	case '8':
-		myGameState->AddBattler("L_Tank", false);
+		myGameState->AddBattler(2, true);
 		break;
 	case '9':
 		myGameState->AddBattler("L_Ranger", false);

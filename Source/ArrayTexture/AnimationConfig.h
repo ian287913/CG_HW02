@@ -45,7 +45,6 @@ Super	(high damage & health, kb-resist)
 */
 
 vector<AnimationConfig> AnimationConfigTable{
-	//{ "L_Basic", "/Lionar/f1_tank.png" , 12, 6},
 	{ "L_Minion"	, "/Lionar/f1_silverguardsquire.png", 12, 4		, 0.0f, 0.25f, 2.0f		, 0.02f, -0.24f, 0.56f},
 	{ "L_Tank"	, "/Lionar/f1_tank.png"					, 12, 6		, 0.0f, 0.25f, 2.0f		, 0.02f, -0.28f, 0.56f},
 	{ "L_Ranger", "/Lionar/f1_backlinearcher.png"		, 8, 16		, 0.0f, 0.34f, 3.7f		, 0.035f, -0.33f, 0.35f},

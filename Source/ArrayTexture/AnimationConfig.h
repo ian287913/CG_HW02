@@ -48,6 +48,7 @@ vector<AnimationConfig> AnimationConfigTable{
 	{ "L_Tank"	, "/Lionar/f1_tank.png"					, 12, 6		, 0.0f, 0.25f	, 0.02f, -0.3f, 0.56f},
 	{ "L_Ranger", "/Lionar/f1_backlinearcher.png"		, 8, 16		, 0.0f, 0.35f	, 0.04f, -0.33f, 0.45f},
 	{ "L_Tower"	, "/Lionar/f1_ironcliffemonument.png"	, 10, 10	, 0.0f, 0.3f	, 0.0f, -0.33f, 0.56f},
+	{ "Icon_Ultimate"	, "/Icon/icon_f1_tempest.png"	, 5, 5		, 0.0f, 0.0f	, 0.0f, 0.0f, 0.0f},
 };
 
 vector<AnimFrameSet> AnimFrameSetTable{
@@ -71,6 +72,10 @@ vector<AnimFrameSet> AnimFrameSetTable{
 	{ "L_Tower", "attack",		{	{2, 6}, {5, 2}, {5, 1}, {5, 0}, {4, 9}, {4, 8}, {4, 7}, {4, 6}, {4, 5}, {4, 4}, {4, 3}, {4, 2}, {4, 1}, {4, 0}, {3, 9}, {3, 8}, {3, 7}, {3, 6}, {3, 5}, {3, 4}}, {}, 6, false, "idle" },
 	{ "L_Tower", "hit",			{	{2, 5}, {2, 4}, {2, 3}}, {}, 6, false },
 	{ "L_Tower", "die",			{	{2, 5}, {2, 4}, {2, 3}, {2, 2}, {2, 1}, {2, 0}, {1, 9}, {1, 8}, {1, 7}, {1, 6}, {1, 5}}, {}, 6, true },
+	
+
+	{ "Icon_Ultimate", "idle",			{	{1, 3}, {3, 1}, {3, 0}, {2, 4}, {2, 3}, {2, 2}}, {}, 3, true },
+	{ "Icon_Ultimate", "run",			{	{2, 1}, {2, 0}, {1, 4}, {3, 2}, {1, 2}, {1, 1}, {1, 0}, {0, 4}, {0, 3}, {0, 2}, {0, 1}, {0, 0}}, {}, 6, true },
 
 };
 

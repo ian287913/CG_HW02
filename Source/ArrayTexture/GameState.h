@@ -51,6 +51,7 @@ public:
 	static const float towerAttack;
 	static const float laserRange;
 	static const float laserSpeed;
+	static const float laserFireOffset;
 	static const int enemySellectWeight[ENMYNUM];
 	
 	int currentMoney;
@@ -81,6 +82,7 @@ protected:
 	float laserTimer;
 	vector<BattleObject*> laseredObjects;
 	float laseringRange;
+	float effectingRange;
 	int allWeights;
 	bool constructed = false;
 	// update呼叫的敵方AI
@@ -91,7 +93,7 @@ protected:
 
 // 參數定義
 const float GameState::spawnCD[CHARNUM] = {2, 2, 2, 2.5f, 5.0f};
-const float GameState::laserCD = 10;
+const float GameState::laserCD = 20;
 const float GameState::laserDelay = 2.0f;
 const float GameState::AICD = 10;
 const float GameState::AICD_range = 2.5f;
@@ -106,7 +108,8 @@ const float GameState::spawnDistanceRange = 0.6f;
 const float GameState::towerHP = 1000;
 const float GameState::towerAttack = 1000;
 const float GameState::laserRange = 15;
-const float GameState::laserSpeed = 10;
+const float GameState::laserSpeed = 60;
+const float GameState::laserFireOffset = 1.2f;
 const int GameState::enemySellectWeight[ENMYNUM] = {3, 1, 0};
 
 // .cpp
@@ -136,7 +139,6 @@ void GameState::Laser()
 		return;
 	}
 	cout << "Game: Use laser!" << endl;
-	// 特效
 	// n秒後攻擊
 	laserTimer = laserDelay;
 	laseredObjects.clear();
@@ -371,7 +373,7 @@ GameState::GameState()
 	{
 		spawnCDing[i] = 0;
 	}
-	laserCDing = 0;
+	laserCDing = laserCD;
 	laserTimer = -1;
 	laseringRange = laserRange;
 	laseredObjects = vector<BattleObject*>();

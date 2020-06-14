@@ -56,6 +56,20 @@ bool DEBUG_MODE = false;
 
 //  will
 GameState* myGameState;
+void PressLaser();
+Animation* laserBeam;
+vector<Animation*> laserFire;
+bool inLaserBeam;
+const float laserBeamTime = 0.8f;
+float laserBeamTimer = 0;
+const float laserFireDelay = 0.9f;
+float laserFireDelayTimer = 0;
+bool inDrawLaserFire = false;
+float laserFiringRange = 0;
+int laserFiringPoint = 0;
+const float laserFireDeleteTime = 3.0f;
+float laserFireDeleteTimer = 0.0f;
+
 bool isGameOver = false;
 bool isWin = false;
 float camara_shape[2] = { 0, 0 };
@@ -88,7 +102,7 @@ const float UI_trans[UINUM][3] =
 	{3.6f,		-3.6f,		1.8f},
 
 	{-9.0f,		-3.8f,		3.0f},	// money button
-	{9.0f,		-3.6f,		3.0f},	// laser button
+	{9.0f,		-3.6f,		2.0f},	// laser button
 
 	{	0,			0,		10.0f},	// black
 	{	0,			0,		3.0f},	// victory title
@@ -189,6 +203,9 @@ void My_LoadTextures()
 		UI_font[i] = new Sprite2D();
 		UI_font[i]->Init(ImagePath + UI_font_path[i] + ".png", 1, 1, 24, false, 0, 0);
 	}
+
+	// Laser
+	laserBeam = new Animation("FX_BeamLaser_Fixed");
 	
 	//	Debug axis
 	DebugSprite = new Sprite2D();
@@ -260,6 +277,7 @@ void My_Init()
 
 	// will
 	myGameState = new GameState();
+	laserFire = vector<Animation*>();
 }
 
 //	Draw a single animation (character)
@@ -410,6 +428,7 @@ void My_Display()
 		}
 	}
 
+
 	////////////////	Draw foreground		//////////////////////////////////////////////
 
 	ParticleSystem::RenderInstances(m_camera, aspect);
@@ -417,6 +436,34 @@ void My_Display()
 	////////////////	scene post FX		//////////////////////////////////////////////
 
 	WindowShader::Render();
+
+	if (inLaserBeam)
+	{
+		float rotatangle = 130.0f * (-laserBeamTimer / laserBeamTime) + 180.0f;
+		if (rotatangle < 95.0f)
+		{
+			rotatangle = 95.0f;
+		}
+		float ypos = 2.3f + myGameState->rightTower->distance * GameObject::depthRatio;
+		float scaAdd = -0.25f / cos(-rotatangle / 180 * 3.141592f);
+		mat4 trans = translate(GameState::rightSpawnPos, ypos, 0)
+			* rotate(rotatangle, 0, 0, 1)
+			* scale(1.5f, 3 * scaAdd, 3);
+		DrawAnimation(laserBeam, trans  * laserBeam->anchorTranslate, 0, vec4(0.4, 0.2f, -0.2f, 0));
+	}
+	if (inDrawLaserFire)
+	{
+		for (int i = laserFire.size() - 1; i >= 0; i--)
+		{
+			mat4 trans = 
+				translate(
+					GameState::rightSpawnPos - (i + 1) * GameState::laserFireOffset, 
+					(GameState::spawnDistance - GameState::spawnDistanceRange) * GameObject::depthRatio,
+					0
+				);
+			DrawAnimation(laserFire[i], trans  * laserFire[i]->anchorTranslate, 0, vec4(0.4, 0.2f, -0.2f, 0));
+		}
+	}
 	
 	////////////////	Draw UI				//////////////////////////////////////////////
 
@@ -578,6 +625,73 @@ void My_Timer(int val)
 	{
 		UI_Button_laser->Elapse(((float)UPDATE_CYCLE) * updateSpeed);
 	}
+
+	// Laser
+	if (inLaserBeam)
+	{
+		laserBeam->Elapse(((float)UPDATE_CYCLE) * updateSpeed);
+		laserBeamTimer += ((float)UPDATE_CYCLE) * updateSpeed * 0.001f;
+		if (laserBeamTimer >= laserBeamTime)
+		{
+			laserBeamTimer = 0;
+			inLaserBeam = false;
+		}
+	}
+
+	if (laserFireDelayTimer > 0)
+	{
+		laserFireDelayTimer -= ((float)UPDATE_CYCLE) * updateSpeed * 0.001f;;
+		if (laserFireDelayTimer <= 0)
+		{
+			// cout << "start laser fire" << endl;
+			// start draw fire
+			inDrawLaserFire = true;
+			laserFiringRange = 0;
+			laserFiringPoint = 0;
+			laserFireDeleteTimer = laserFireDeleteTime;
+		}
+	}
+
+	if (inDrawLaserFire)
+	{
+		laserFiringRange += GameState::laserSpeed * ((float)UPDATE_CYCLE) * updateSpeed * 0.001f;
+		
+		if (laserFiringRange >= GameState::laserRange)
+		{
+			// cout << "laser fire reach end" << endl;
+		}
+		if (!(laserFiringRange >= GameState::laserRange) 
+			&& laserFiringRange >= (laserFiringPoint)* GameState::laserFireOffset)
+		{
+			while (laserFiringRange >= (laserFiringPoint)* GameState::laserFireOffset)
+			{
+				laserFiringPoint++;
+				laserFire.push_back(new Animation("FX_BeamFire"));
+				// cout << "laser fire add one" << endl;
+			}
+		}
+		laserFireDeleteTimer -= ((float)UPDATE_CYCLE) * updateSpeed * 0.001f;
+	}
+
+	if (inDrawLaserFire && laserFireDeleteTimer <= 0)
+	{
+		cout << "laser fire delete" << endl;
+		for (int i = laserFire.size() - 1; i >= 0; i--)
+		{
+			delete laserFire[i];
+			laserFire[i] = NULL;
+			laserFire.pop_back();
+		}
+		inDrawLaserFire = false;
+	}
+	else if (inDrawLaserFire)
+	{
+		for (int i = laserFire.size() - 1; i >= 0; i--)
+		{
+			laserFire[i]->Elapse(((float)UPDATE_CYCLE) * updateSpeed);
+		}
+	}
+
 	//	Scene FX
 	WindowShader::UpdateFxTasks(((float)UPDATE_CYCLE) * updateSpeed);
 
@@ -710,7 +824,7 @@ void My_Keyboard(unsigned char key, int x, int y)
 		ResetGameState();
 		break;
 	case 'l':
-		myGameState->Laser();
+		PressLaser();
 		break;
 	case 'm':
 		cout << "CHEAT: money+ 1000" << endl;
@@ -785,7 +899,7 @@ void UIButton(float x, float y)
 			};
 			if (sqrtf(pow(x - UI_pos[0], 2) + pow(y - UI_pos[1], 2)) < range_laser)
 			{
-				myGameState->Laser();
+				PressLaser();
 				return;
 			}
 		}
@@ -923,6 +1037,24 @@ void DrawFont(string input, int trans, int enable)
 		);
 		printX += UI_font_dist * UI_trans[trans][2] * multi;
 	}
+}
+void PressLaser()
+{
+	if (myGameState->laserCDing > 0)
+	{
+		cout << "Game: Laser is in CD" << endl;
+		return;
+	}
+	inLaserBeam = true;
+	inDrawLaserFire = false;
+	laserBeamTimer = 0;
+	laserFiringPoint = 0;
+	laserFireDelayTimer = laserFireDelay;
+	laserBeam->SetCurrentSet("idle");
+	WindowShader::AddFxTask({ 0.0f, "ColorScale", 0.7f, 0.15f });
+	WindowShader::AddFxTask({ 1500.0f, "ColorScale", 4.0f, 0.1f });
+	WindowShader::AddFxTask({ 2000.0f, "ColorScale", 1.0f, 0.03f});
+	myGameState->Laser();
 }
 
 int main(int argc, char *argv[])

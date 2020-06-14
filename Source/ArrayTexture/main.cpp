@@ -21,6 +21,7 @@ struct
 	GLint  mv_matrix;
 	GLint  proj_matrix;
 	GLint  fading;
+	GLint  grayScale;
 	GLint  color;
 } uniforms;
 
@@ -237,6 +238,7 @@ void My_Init()
 	uniforms.proj_matrix = glGetUniformLocation(program, "um4p");
 	uniforms.mv_matrix = glGetUniformLocation(program, "um4mv");
 	uniforms.fading = glGetUniformLocation(program, "fading");
+	uniforms.grayScale = glGetUniformLocation(program, "grayScale");
 	uniforms.color = glGetUniformLocation(program, "color");
 
 	glUseProgram(program);
@@ -260,7 +262,7 @@ void My_Init()
 }
 
 //	Draw a single animation (character)
-void DrawAnimation(Animation* anim, glm::mat4 _matrix, float fading = 0.0f, glm::vec4 color = glm::vec4(0.0f, 0.0f, 0.0f, 0.0f))
+void DrawAnimation(Animation* anim, glm::mat4 _matrix, float fading = 0.0f, glm::vec4 color = glm::vec4(0.0f, 0.0f, 0.0f, 0.0f), float grayScale = 0.0f)
 {
 	glm::vec2 pos[1];
 	int frame[1];
@@ -283,6 +285,7 @@ void DrawAnimation(Animation* anim, glm::mat4 _matrix, float fading = 0.0f, glm:
 	///glUniformMatrix4fv(uniforms.mv_matrix, 1, GL_FALSE, value_ptr(m_camera.GetViewMatrix() * m_camera.GetModelMatrix() * _matrix * translate(0, debug_x, 0) * anim->spriteSheet->GetModelMat()));
 	glUniformMatrix4fv(uniforms.proj_matrix, 1, GL_FALSE, value_ptr(m_camera.GetProjectionMatrix(aspect)));
 	glUniform1f(uniforms.fading, fading);
+	glUniform1f(uniforms.grayScale, grayScale);
 	glUniform4f(uniforms.color, color.r, color.g, color.b, color.a);
 
 	glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, 1);
@@ -293,7 +296,7 @@ void DrawAnimation(Animation* anim, glm::mat4 _matrix, float fading = 0.0f, glm:
 }
 
 //	draw only one-frame sprite
-void DrawSprite(Sprite2D* _sprite, glm::mat4 _parentMatrix, const vec3& _position, const vec3& _scale, float fading = 0.0f, glm::vec4 color = glm::vec4(0.0f, 0.0f, 0.0f, 0.0f))
+void DrawSprite(Sprite2D* _sprite, glm::mat4 _parentMatrix, const vec3& _position, const vec3& _scale, float fading = 0.0f, glm::vec4 color = glm::vec4(0.0f, 0.0f, 0.0f, 0.0f), float grayScale = 0.0f)
 {
 	glm::vec2 pos[1];
 	int frame[1];
@@ -314,6 +317,7 @@ void DrawSprite(Sprite2D* _sprite, glm::mat4 _parentMatrix, const vec3& _positio
 	glUniformMatrix4fv(uniforms.mv_matrix, 1, GL_FALSE, value_ptr(m_camera.GetViewMatrix() * m_camera.GetModelMatrix() * _parentMatrix * translate(_position) * scale(_scale) * _sprite->GetModelMat()));
 	glUniformMatrix4fv(uniforms.proj_matrix, 1, GL_FALSE, value_ptr(m_camera.GetProjectionMatrix(aspect)));
 	glUniform1f(uniforms.fading, fading);
+	glUniform1f(uniforms.grayScale, grayScale);
 	glUniform4f(uniforms.color, color.r, color.g, color.b, color.a);
 	glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, 1);
 	_sprite->Disable();
@@ -422,23 +426,26 @@ void My_Display()
 		for (int i = 0; i < CHARNUM; i++)
 		{
 			vec4 enable = (myGameState->CanAdd(i)) ? vec4(0, 0, 0, 0) : vec4(-0.5f, -0.5f, -0.4f, 0);
+			float gray = (myGameState->CanAdd(i)) ? 0 : 1;
 			DrawAnimation(
 				UI_Button_chara[i],
 				translate(UI_trans[i][0], UI_trans[i][1] - UI_Button_chara_size, 0)
 				* scale(-character_scale[i], character_scale[i], 1)
 				* UI_Button_chara[i]->anchorTranslate,
 				0.0f,
-				enable
+				enable,
+				gray
 			);
 		}
 
 		// draw money lv up button UI
 		{
 			vec4 enable = (myGameState->CanLevelUp()) ? vec4(0, 0, 0, 0) : vec4(-0.5f, -0.5f, -0.4f, 0);
+			float gray = (myGameState->CanLevelUp()) ? 0 : 1;
 			DrawSprite(UI_Button_money, translate(0, 0, 0),
 				vec3(UI_trans[5][0], UI_trans[5][1], 0),
 				vec3(UI_trans[5][2], UI_trans[5][2], 1),
-				0.0f, enable
+				0.0f, enable, gray
 			);
 		}
 		// darw laser button UI
@@ -541,6 +548,8 @@ void My_Timer(int val)
 	{
 		UI_Button_chara[i]->Elapse(((float)UPDATE_CYCLE) * updateSpeed);
 	}
+	//	Scene FX
+	WindowShader::UpdateFxTasks(((float)UPDATE_CYCLE) * updateSpeed);
 
 	glutPostRedisplay();
 	glutTimerFunc(UPDATE_CYCLE, My_Timer, val);
@@ -600,12 +609,20 @@ void My_Keyboard(unsigned char key, int x, int y)
 		cout << "debug_y = " << debug_y << "\n";
 		break;
 	case 'd':
-		WindowShader::grayScale += 0.2f;
+		//WindowShader::grayScale += 0.2f;
+
+		//	simulate a laser FX:
+		WindowShader::AddFxTask({ 0.0f, "ColorScale", 0.7f, 0.15f });
+		WindowShader::AddFxTask({ 1500.0f, "ColorScale", 4.0f, 0.1f });
+		WindowShader::AddFxTask({ 2000.0f, "ColorScale", 1.0f, 0.03f});
+
+
 		debug_x += 0.05f;
 		cout << "debug_x = " << debug_x << "\n";
 		break;
 	case 'a':
-		WindowShader::grayScale -= 0.2f;
+		//WindowShader::grayScale -= 0.2f;
+
 		debug_x -= 0.05f;
 		cout << "debug_x = " << debug_x << "\n";
 		break;

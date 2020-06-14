@@ -17,7 +17,7 @@ void main(void)
 	//	apply grayScale
 	vec4 texture_color = texture(tex, fs_in.texcoord);
 	float grayscale_color = 0.299*texture_color.r + 0.587*texture_color.g + 0.114*texture_color.b;
-	color = (vec4(grayscale_color, grayscale_color, grayscale_color, 1.0) * grayScale) + (texture_color * (1.0f - grayScale));
+	color = (vec4(grayscale_color, grayscale_color, grayscale_color, texture_color.a) * grayScale) + (texture_color * (1.0f - grayScale));
 	
 	//	colorScale
 	color = color * colorScale;

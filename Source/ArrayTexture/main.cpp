@@ -111,8 +111,8 @@ const float UI_trans[UINUM][3] =
 	{	0,			0,		3.0f},	// defeat title
 	{0.0f,		-3.0f,		1.0f},	// restart button
 
-	{	-7,		0.6f,		0.5f},	// left tower hp
-	{	7,		0.6f,		0.5f},	// right tower hp
+	{	-8,		1.0f,		0.5f},	// left tower hp
+	{	8,		1.2f,		0.5f},	// right tower hp
 	{	0,		  3.6,		1.0f},	// money
 	{-9.13f,	-3.7f,		0.6f},	// level
 

@@ -12,7 +12,7 @@
 using namespace glm;
 using namespace std;
 
-#define UPDATE_CYCLE 33		//	(mini second)
+#define UPDATE_CYCLE 22		//	(mini second)
 #define UINUM 20				//	UI number
 
 //uniform id
@@ -47,6 +47,8 @@ float updateSpeed = 1.0f;
 Sprite2D* ShadowSprite;
 Sprite2D* BackgroundSprite;
 Sprite2D* DebugSprite;
+Sprite2D* LionarRibbonSprite;
+Sprite2D* AbyssianRibbonSprite;
 
 float imageScale = 1.0f;
 float debug_x = 0.0f;
@@ -203,6 +205,12 @@ void My_LoadTextures()
 		UI_font[i] = new Sprite2D();
 		UI_font[i]->Init(ImagePath + UI_font_path[i] + ".png", 1, 1, 24, false, 0, 0);
 	}
+
+	//	Ribbons
+	LionarRibbonSprite = new Sprite2D();
+	LionarRibbonSprite->Init(ImagePath + "Icon/f1_champion_l.png", 1, 1, 24, false, 0, 0);
+	AbyssianRibbonSprite = new Sprite2D();
+	AbyssianRibbonSprite->Init(ImagePath + "Icon/f4_champion_l.png", 1, 1, 24, false, 0, 0);
 
 	// Laser
 	laserBeam = new Animation("FX_BeamLaser_Fixed");
@@ -451,6 +459,24 @@ void My_Display()
 			* rotate(rotatangle, 0, 0, 1)
 			* scale(1.5f, 3 * scaAdd, 3);
 		DrawAnimation(laserBeam, trans  * laserBeam->anchorTranslate, 0, vec4(0.4, 0.2f, -0.2f, 0));
+
+		//	charge
+		ParticleSystem::CreateInstance(vec3(GameState::rightSpawnPos, ypos, 0),
+			5, "Charge", vec2(0, 6.28), vec2(-1.9f, -4.0f),
+			vec2(2.0f, 4.0f), 1.5f, 1.0f,
+			vec2(0, 6.28f), vec2(0.6f, 1.0f), 1, 6.0f, true);
+
+		//	fire
+		ParticleSystem::CreateInstance(vec3((-(2.4 + debug_x) * tan((-rotatangle / 180 * 3.141592f))) + 7.0f, debug_y - 2.7, 0),
+			20, "Fire", vec2(3.0/2.0, 3.2/2.0), vec2(2.0f, 4.0f),
+			vec2(0.0f, 0.35f), 0.3f, 0.6f,
+			vec2(0, 6.28), vec2(0.2f, 0.5f), 4, 1.0f, true);
+
+		//	fire
+		ParticleSystem::CreateInstance(vec3(GameState::rightSpawnPos, ypos, 0),
+			3, "Fire", vec2(0, 6.28), vec2(-0.7f, -1.0f),
+			vec2(0.0f, 0.3f), 0.1f, 0.3f,
+			vec2(0, 6.28), vec2(0.7f, 1.2f), 0.3, 0.7f, true);
 	}
 	if (inDrawLaserFire)
 	{
@@ -578,6 +604,11 @@ void My_Display()
 		}
 		DrawSprite(UI_Button_restart, translate(0, 0, 0), vec3(UI_trans[10][0], UI_trans[10][1], 0), vec3(UI_trans[10][2], UI_trans[10][2], 1));
 	}
+
+	//	Ribbons
+	DrawSprite(AbyssianRibbonSprite, rotate(35, 0, 0, 1), vec3(-(debug_x + 6.1), debug_y + 8.2, 0), vec3(2.5, 2.5, 1));
+	DrawSprite(LionarRibbonSprite, rotate(-35, 0, 0, 1), vec3((debug_x + 6.1), debug_y + 8.2, 0), vec3(2.5, 2.5, 1));
+
 
 	if (DEBUG_MODE)
 	{
@@ -740,6 +771,11 @@ void My_Keyboard(unsigned char key, int x, int y)
 			5, "Charge", vec2(0, 6.28), vec2(-1.9f, -4.0f),
 			vec2(2.0f, 4.0f), 1.5f, 1.0f,
 			vec2(0, 6.28f), vec2(0.6f, 1.0f), 1, 2.0f);
+		//	fire
+		/*ParticleSystem::CreateInstance(vec3(0, -1, 0),
+			10, "Fire", vec2(3.0/2.0, 3.2/2.0), vec2(2.0f, 4.0f),
+			vec2(0.0f, 0.3f), 0.3f, 0.6f,
+			vec2(0, 6.28), vec2(0.2f, 0.5f), 4, 1.0f, true);*/
 		/*ParticleSystem::CreateInstance(vec3(2,0,0),
 			50, "Hit", vec2(0, 6.28f), vec2(-0.001f, -1.5f),
 			vec2(0.0f, 0.5f), 1.8f, 0.5f,
@@ -749,13 +785,13 @@ void My_Keyboard(unsigned char key, int x, int y)
 			_spawnRadiusLH,	_fadeRadius, _fadeDistance,
 			_rotationLH, _scaleLH, _lifetime, _timeSpeed)
 		*/
-		WindowShader::colorScale += 0.2f;
+		///WindowShader::colorScale += 0.2f;
 
 		debug_y += 0.2f;
 		cout << "debug_y = " << debug_y << "\n";
 		break;
 	case 's':
-		WindowShader::colorScale -= 0.2f;
+		///WindowShader::colorScale -= 0.2f;
 
 		debug_y -= 0.2f;
 		cout << "debug_y = " << debug_y << "\n";
@@ -832,6 +868,7 @@ void My_Keyboard(unsigned char key, int x, int y)
 		ResetGameState();
 		break;
 	case 'l':
+		myGameState->laserCDing = 0;
 		PressLaser();
 		break;
 	case 'm':

@@ -47,15 +47,15 @@ Super	(high damage & health, kb-resist)
 vector<AnimationConfig> AnimationConfigTable{
 	{ "L_Minion"	, "/Lionar/f1_silverguardsquire.png", 12, 4		, 0.0f, 0.25f, 2.0f		, 0.02f, -0.24f, 0.56f},
 	{ "L_Tank"	, "/Lionar/f1_tank.png"					, 12, 6		, 0.0f, 0.25f, 2.0f		, 0.02f, -0.28f, 0.56f},
-	{ "L_Ranger", "/Lionar/f1_backlinearcher.png"		, 8, 16		, 0.0f, 0.34f, 3.7f		, 0.035f, -0.33f, 0.35f},
-	{ "L_Lancer"	, "/Lionar/f1_radiantdragoon.png"	, 10, 8		, 0.0f, 0.32f, 3.3f		, -0.02f, -0.34f, 0.26f},
+	{ "L_Ranger", "/Lionar/f1_backlinearcher.png"		, 8, 16		, 0.0f, 0.34f, 3.5f		, 0.035f, -0.33f, 0.35f},
+	{ "L_Lancer"	, "/Lionar/f1_radiantdragoon.png"	, 10, 8		, 0.0f, 0.32f, 3.5f		, -0.02f, -0.34f, 0.26f},
 	{ "L_Super"	, "/Lionar/f1_tier2general.png"			, 10, 12	, 0.0f, 0.32f, 4.0f		, 0.01f, -0.33f, 0.50f},
-	{ "L_Tower"	, "/Lionar/f1_ironcliffemonument.png"	, 10, 10	, 0.0f, 0.3f, 6.0f		, 0.0f, -0.33f, 0.46f},
+	{ "L_Tower"	, "/Lionar/f1_ironcliffemonument.png"	, 10, 10	, 0.0f, 0.3f, 6.0f		, 0.0f, -0.33f, 0.3f},
 	
 	{ "A_Minion"	, "/Abyssian/neutral_shadow1.png"	, 12, 4		, 0.0f, 0.27f, 2.8f		, 0.0f, -0.28f, 0.3f},
-	{ "A_Ranger"	, "/Abyssian/boss_skurge.png"		, 12, 5		, 0.0f, 0.27f, 3.0f		, 0.0f, -0.28f, 0.43f},
-	{ "A_Shield"	, "/Abyssian/boss_manaman.png"		, 10, 10	, 0.0f, 0.42f, 3.0f		, 0.0f, -0.43f, 0.3f},
-	{ "A_Tower"	, "/Abyssian/f4_buildlegendary.png"		, 10, 10	, 0.0f, 0.3f, 5.0f		, 0.0f, -0.32f, 0.4f},
+	{ "A_Ranger"	, "/Abyssian/boss_skurge.png"		, 12, 5		, 0.0f, 0.27f, 2.5f		, 0.0f, -0.28f, 0.43f},
+	{ "A_Shield"	, "/Abyssian/boss_manaman.png"		, 10, 10	, 0.0f, 0.42f, 3.4f		, 0.0f, -0.43f, 0.3f},
+	{ "A_Tower"	, "/Abyssian/f4_buildlegendary.png"		, 10, 10	, 0.0f, 0.3f, 5.8f		, 0.0f, -0.32f, 0.4f},
 
 	
 	
@@ -113,7 +113,7 @@ vector<AnimFrameSet> AnimFrameSetTable{
 	{ "A_Tower", "die",			{	{3, 1}, {6, 1}, {2, 9}, {2, 8}, {2, 7}, {2, 6}, {2, 5}, {2, 4}, {2, 3}, {2, 2}, {2, 1}, {2, 0}, {1, 9}, {1, 8}, {1, 7}, {1, 6}, {1, 5}, {1, 4}, {1, 3}}, {}, 6, false },
 
 	{ "A_Minion", "idle",		{	{2, 11}, {1, 0}, {0, 11}, {0, 10}, {0, 9}, {0, 8}, {0, 7}, {0, 6},  }, {}, 6, true },
-	{ "A_Minion", "run",		{	{0, 5}, {0, 4}, {0, 3}, {0, 2}, {0, 1}, {0, 0},  }, {}, 6, true },
+	{ "A_Minion", "run",		{	{0, 5}, {0, 4}, {0, 3}, {0, 2}, {0, 1}, {0, 0},  }, {}, 10, true },
 	{ "A_Minion", "attack",		{	{1, 11}, {3, 9}, {3, 8}, {3, 7}, {3, 6}, {3, 5}, {3, 4}, {3, 3}, {3, 2}, {3, 1}, {3, 0},  }, {}, 6, false, "idle" },
 	{ "A_Minion", "die",		{	{3, 10}, {1, 10}, {1, 9}, {1, 8}, {1, 7}, {1, 6}, {1, 5}, {1, 4},  }, {}, 6, false},
 	{ "A_Minion", "hit",		{	{1, 3}, {1, 2}, {1, 1},  }, {}, 6, false, "idle"},

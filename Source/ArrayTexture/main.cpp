@@ -47,6 +47,8 @@ float updateSpeed = 1.0f;
 Sprite2D* ShadowSprite;
 Sprite2D* BackgroundSprite;
 Sprite2D* DebugSprite;
+Sprite2D* LionarRibbonSprite;
+Sprite2D* AbyssianRibbonSprite;
 
 float imageScale = 1.0f;
 float debug_x = 0.0f;
@@ -203,6 +205,12 @@ void My_LoadTextures()
 		UI_font[i] = new Sprite2D();
 		UI_font[i]->Init(ImagePath + UI_font_path[i] + ".png", 1, 1, 24, false, 0, 0);
 	}
+
+	//	Ribbons
+	LionarRibbonSprite = new Sprite2D();
+	LionarRibbonSprite->Init(ImagePath + "Icon/f1_champion_l.png", 1, 1, 24, false, 0, 0);
+	AbyssianRibbonSprite = new Sprite2D();
+	AbyssianRibbonSprite->Init(ImagePath + "Icon/f4_champion_l.png", 1, 1, 24, false, 0, 0);
 
 	// Laser
 	laserBeam = new Animation("FX_BeamLaser_Fixed");
@@ -596,6 +604,11 @@ void My_Display()
 		}
 		DrawSprite(UI_Button_restart, translate(0, 0, 0), vec3(UI_trans[10][0], UI_trans[10][1], 0), vec3(UI_trans[10][2], UI_trans[10][2], 1));
 	}
+
+	//	Ribbons
+	DrawSprite(AbyssianRibbonSprite, rotate(35, 0, 0, 1), vec3(-(debug_x + 6.1), debug_y + 8.2, 0), vec3(2.5, 2.5, 1));
+	DrawSprite(LionarRibbonSprite, rotate(-35, 0, 0, 1), vec3((debug_x + 6.1), debug_y + 8.2, 0), vec3(2.5, 2.5, 1));
+
 
 	if (DEBUG_MODE)
 	{
